@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SiagaQu - Panic Button Module</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        siaga: {
+                            50: '#fef2f2',
+                            100: '#ffe1e1',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                        },
+                        rtqu: {
+                            50: '#ecfdf5',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .animate-pulse-ring {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-radar {
+            animation: radar-sweep 3s linear infinite;
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
+
+    <!-- Container Frame HP Mobile -->
+    <div class="w-full max-w-md min-h-screen sm:min-h-[844px] sm:max-h-[900px] sm:rounded-[38px] bg-slate-900 text-slate-100 shadow-2xl flex flex-col justify-between overflow-hidden relative border-0 sm:border-8 border-slate-800">
+
+        <!-- HEADER SIAGAQU -->
+        <div class="bg-gradient-to-b from-slate-800 to-slate-900 border-b border-slate-800 p-4 pt-6 z-20">
+            <div class="flex items-center justify-between mb-3">
+                <button onclick="goBackMain()" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 active:scale-95 flex items-center justify-center transition">
+                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <div class="text-center">
+                    <div class="flex items-center justify-center space-x-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-siaga-500 animate-ping"></span>
+                        <span class="font-black text-lg tracking-wide text-white">Siaga<span class="text-siaga-500">Qu</span></span>
+                        <span class="bg-siaga-500/20 text-siaga-400 border border-siaga-500/40 text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase">Panic Button</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium">RT 03 / RW 05 • Pos Radar Siaga</p>
+                </div>
+
+                <!-- GPS Status Badge -->
+                <div class="flex items-center space-x-1 bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 px-2 py-1 rounded-full text-[10px] font-bold">
+                    <svg class="w-3 h-3 text-emerald-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>GPS Lock</span>
+                </div>
+            </div>
+
+            <!-- TOGGLE MODE SIMULASI vs REAL -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-2 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-white flex items-center">
+                            <span id="modeTitleText">Mode Latihan / Simulasi</span>
+                        </div>
+                        <div class="text-[9px] text-slate-400" id="modeDescText">Sirine aman, sinyal hanya dites di HP ini.</div>
+                    </div>
+                </div>
+
+                <!-- Switch Toggle -->
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="modeSimulasiToggle" class="sr-only peer" checked onchange="toggleModeSimulasi(this)">
+                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5 hide-scrollbar">
+
+            <!-- TAB 1: PANIC BUTTON (UTAMA) -->
+            <div id="tabContentMain" class="space-y-5">
+
+                <!-- SELECTOR JENIS DARURAT -->
+                <div>
+                    <div class="flex justify-between items-center mb-2 px-1">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Pilih Kategori Kejadian</span>
+                        <span class="text-[10px] text-siaga-400 font-semibold" id="selectedCategoryBadge">Anak / Orang Hilang</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5" id="emergencyCategoryGrid">
+                        <!-- Category 1 -->
+                        <button onclick="selectCategory('Anak / Orang Hilang', this)" class="category-btn active border-2 border-siaga-500 bg-siaga-950/40 text-white p-3 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-siaga-600 text-white flex items-center justify-center flex-shrink-0 shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold">Orang / Anak Hilang</div>
+                                <div class="text-[9px] text-slate-400">Butuh sebar mata cepat</div>
+                            </div>
+                        </button>
+
+                        <!-- Category 2 -->
+                        <button onclick="selectCategory('Maling / Kejahatan', this)" class="category-btn border-2 border-slate-800 bg-slate-800/50 hover:border-slate-700 text-slate-300 p-3 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-slate-700 text-slate-200 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white">Maling / Kejahatan</div>
+                                <div class="text-[9px] text-slate-400">Penyergapan & Siskamling</div>
+                            </div>
+                        </button>
+
+                        <!-- Category 3 -->
+                        <button onclick="selectCategory('Kebakaran', this)" class="category-btn border-2 border-slate-800 bg-slate-800/50 hover:border-slate-700 text-slate-300 p-3 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-slate-700 text-slate-200 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white">Kebakaran</div>
+                                <div class="text-[9px] text-slate-400">Bantuan damkar warga</div>
+                            </div>
+                        </button>
+
+                        <!-- Category 4 -->
+                        <button onclick="selectCategory('Medis / Ambulans', this)" class="category-btn border-2 border-slate-800 bg-slate-800/50 hover:border-slate-700 text-slate-300 p-3 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-slate-700 text-slate-200 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white">Kondisi Medis</div>
+                                <div class="text-[9px] text-slate-400">Pertolongan pertama</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TOMBOL PANIC BUTTON BUNDAR MENGAMBANG -->
+                <div class="flex flex-col items-center justify-center py-4 relative">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                        2. Tekan & Tahan 3 Detik
+                    </div>
+
+                    <!-- Outer Ring Glow -->
+                    <div class="relative flex items-center justify-center">
+                        <div class="absolute w-56 h-56 rounded-full bg-siaga-600/20 border border-siaga-500/30 animate-pulse-ring pointer-events-none"></div>
+                        <div class="absolute w-48 h-48 rounded-full bg-siaga-600/30 animate-ping pointer-events-none opacity-40"></div>
+
+                        <!-- Progress SVG Ring -->
+                        <svg class="w-44 h-44 transform -rotate-90 relative z-10 pointer-events-none">
+                            <circle cx="88" cy="88" r="80" stroke="currentColor" stroke-width="8" class="text-slate-800" fill="transparent" />
+                            <circle id="holdProgressCircle" cx="88" cy="88" r="80" stroke="currentColor" stroke-width="8" class="text-siaga-500 transition-all duration-75" fill="transparent" stroke-dasharray="502" stroke-dashoffset="502" stroke-linecap="round" />
+                        </svg>
+
+                        <!-- Main Button -->
+                        <button id="panicButton"
+                                onmousedown="startHold()" onmouseup="endHold()" onmouseleave="endHold()"
+                                ontouchstart="startHold(event)" ontouchend="endHold()" ontouchcancel="endHold()"
+                                class="absolute z-20 w-36 h-36 rounded-full bg-gradient-to-tr from-siaga-800 via-siaga-600 to-siaga-500 hover:from-siaga-700 hover:to-siaga-400 active:scale-95 shadow-2xl flex flex-col items-center justify-center border-4 border-siaga-300/40 text-white transition-all cursor-pointer">
+                            <svg class="w-12 h-12 mb-1 drop-shadow-md animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span class="text-xs font-black uppercase tracking-wider">PANIC</span>
+                            <span class="text-[9px] font-bold text-siaga-200">HOLD 3 DETIK</span>
+                        </button>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400 text-center mt-4 max-w-xs">
+                        Sinyal radio otomatis membunyikan alarm warga radius <strong class="text-white">500m - 1km</strong> + pengurus RT domisili.
+                    </p>
+                </div>
+
+                <!-- CARDS INFORMASI SIAGA QUICK TARGET -->
+                <div class="bg-slate-800/50 rounded-2xl p-3.5 border border-slate-700/60 space-y-2">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex justify-between">
+                        <span>Target Broadcast Otomatis</span>
+                        <span class="text-emerald-400">3 Kontak Aktif</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
+                        <div class="p-2 bg-slate-900/80 rounded-xl border border-slate-700">
+                            <div class="text-white font-bold">Pengurus RT 03</div>
+                            <div class="text-emerald-400 font-medium">Auto Acc</div>
+                        </div>
+                        <div class="p-2 bg-slate-900/80 rounded-xl border border-slate-700">
+                            <div class="text-white font-bold">Siskamling</div>
+                            <div class="text-emerald-400 font-medium">Sirine On</div>
+                        </div>
+                        <div class="p-2 bg-slate-900/80 rounded-xl border border-slate-700">
+                            <div class="text-white font-bold">Keluarga Utama</div>
+                            <div class="text-emerald-400 font-medium">SMS + Call</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: KONTAK DARURAT (SETTING) -->
+            <div id="tabContentContacts" class="space-y-4 hidden">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Kontak Ring 1 (Keluarga & RT)</h3>
+                    <button onclick="addContact()" class="text-xs bg-rtqu-700 hover:bg-rtqu-600 text-white font-bold px-2.5 py-1 rounded-lg transition">
+                        + Tambah
+                    </button>
+                </div>
+
+                <div class="space-y-2.5" id="contactsContainer">
+                    <!-- Default Contact 1 -->
+                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full bg-rtqu-700/40 text-rtqu-400 flex items-center justify-center font-bold text-xs border border-rtqu-600/30">
+                                PAK
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white">Pak RT Ahmad (Ketua RT 03)</div>
+                                <div class="text-[10px] text-slate-400">0812-3456-7890 • Pengurus Utama</div>
+                            </div>
+                        </div>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold">Prioritas</span>
+                    </div>
+
+                    <!-- Default Contact 2 -->
+                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full bg-siaga-600/30 text-siaga-400 flex items-center justify-center font-bold text-xs border border-siaga-500/30">
+                                IST
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white">Istri / Keluarga Rumah</div>
+                                <div class="text-[10px] text-slate-400">0813-9988-7766 • Kontak Kerabat</div>
+                            </div>
+                        </div>
+                        <span class="text-[9px] bg-siaga-500/20 text-siaga-400 px-2 py-0.5 rounded-full border border-siaga-500/30 font-bold">Darurat</span>
+                    </div>
+                </div>
+
+                <!-- Instansi Resmi -->
+                <div class="bg-slate-800/40 p-3 rounded-2xl border border-slate-700/50 mt-4 space-y-2">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Instansi Resmi Terdekat</div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <a href="tel:110" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-white flex items-center justify-between">
+                            <span>Polsek Terdekat</span>
+                            <span class="text-siaga-400 font-bold">110</span>
+                        </a>
+                        <a href="tel:113" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-white flex items-center justify-between">
+                            <span>Pemadam (Damkar)</span>
+                            <span class="text-siaga-400 font-bold">113</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: RIWAYAT DARURAT & LOG -->
+            <div id="tabContentHistory" class="space-y-4 hidden">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Log Kejadian Tersimpan</h3>
+                    <button onclick="clearHistory()" class="text-[10px] text-slate-400 hover:text-siaga-400 underline">Hapus Log</button>
+                </div>
+
+                <div class="space-y-2.5" id="historyContainer">
+                    <!-- History items will be injected dynamically -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- NAVIGASI BAWAH SIAGAQU -->
+        <div class="bg-slate-900 border-t border-slate-800 px-4 py-2.5 flex items-center justify-around z-20">
+            <button onclick="switchTab('main', this)" class="nav-btn text-siaga-500 flex flex-col items-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span class="text-[10px] font-bold mt-1">Panic Button</span>
+            </button>
+
+            <button onclick="switchTab('contacts', this)" class="nav-btn text-slate-500 hover:text-siaga-400 flex flex-col items-center transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span class="text-[10px] font-medium mt-1">Kontak Siaga</span>
+            </button>
+
+            <button onclick="switchTab('history', this)" class="nav-btn text-slate-500 hover:text-siaga-400 flex flex-col items-center transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-[10px] font-medium mt-1">Riwayat Log</span>
+            </button>
+        </div>
+
+        <!-- OVERLAY SIMULASI DARURAT AKTIF (ALUR 3-5 DETIK) -->
+        <div id="emergencyOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col justify-between p-5 hidden opacity-0 transition-opacity duration-300">
+            
+            <!-- Header Overlay -->
+            <div class="flex items-center justify-between border-b border-siaga-500/30 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-siaga-500 animate-ping"></span>
+                    <span class="font-extrabold text-sm text-siaga-400 uppercase tracking-widest">SINYAL DARURAT AKTIF</span>
+                </div>
+                <div class="text-[11px] font-bold text-slate-400" id="overlayTimerText">00:05</div>
+            </div>
+
+            <!-- Body Flow Visualizer -->
+            <div class="my-auto text-center space-y-6">
+                
+                <!-- Animated Radar / Siren Visual -->
+                <div class="relative w-40 h-40 mx-auto flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-2 border-siaga-500/40 animate-ping"></div>
+                    <div class="absolute inset-2 rounded-full border border-siaga-500/20 animate-radar"></div>
+                    <div class="w-28 h-28 rounded-full bg-siaga-600/30 border-2 border-siaga-500 flex flex-col items-center justify-center text-white shadow-2xl">
+                        <svg class="w-10 h-10 text-siaga-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                        </svg>
+                        <span class="text-[10px] font-black uppercase text-siaga-200 mt-1" id="activeCategoryTitle">ANAK HILANG</span>
+                    </div>
+                </div>
+
+                <!-- Status Step Sequence -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-left space-y-3 max-w-xs mx-auto shadow-xl">
+                    
+                    <div class="flex items-center space-x-3 text-xs" id="step1">
+                        <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] border border-emerald-500/40">✓</div>
+                        <span class="text-slate-200">0s: Titik GPS Terkunci (RT 03 Blok A/12)</span>
+                    </div>
+
+                    <div class="flex items-center space-x-3 text-xs opacity-40 transition-opacity" id="step2">
+                        <div class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-[10px] border border-slate-700" id="step2Icon">2</div>
+                        <span class="text-slate-200">1-2s: Broadcast Sirine Radius 500m-1km</span>
+                    </div>
+
+                    <div class="flex items-center space-x-3 text-xs opacity-40 transition-opacity" id="step3">
+                        <div class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-[10px] border border-slate-700" id="step3Icon">3</div>
+                        <span class="text-slate-200">3s: Auto-Create Group ChatQu RT</span>
+                    </div>
+
+                    <div class="flex items-center space-x-3 text-xs opacity-40 transition-opacity" id="step4">
+                        <div class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-[10px] border border-slate-700" id="step4Icon">4</div>
+                        <span class="text-slate-200">4-5s: Rekam Mic & Subtitel Teks Active</span>
+                    </div>
+
+                </div>
+
+                <!-- Real-time Voice Transcript Box -->
+                <div class="bg-slate-900 border border-siaga-500/40 rounded-2xl p-3.5 max-w-xs mx-auto text-left relative overflow-hidden">
+                    <div class="text-[9px] font-bold text-siaga-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                        <span class="flex items-center space-x-1">
+                            <span class="w-2 h-2 rounded-full bg-siaga-500 animate-ping"></span>
+                            <span>Live Transkrip Suara Pelapor</span>
+                        </span>
+                        <span class="text-slate-500" id="recordingTimer">00:03</span>
+                    </div>
+                    <div class="text-xs font-medium text-white italic bg-slate-950 p-2.5 rounded-xl border border-slate-800 min-h-[48px]" id="liveTranscriptText">
+                        "Merekam suara..."
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Action Buttons Overlay -->
+            <div class="space-y-2">
+                <button onclick="saveAndComplete()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg transition text-xs uppercase tracking-wider flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Simpan Ke Device & Buka ChatQu</span>
+                </button>
+                <button onclick="cancelEmergency()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold py-2.5 rounded-2xl transition text-xs">
+                    Batalkan Sinyal (Salah Tekan)
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // State variables
+        let selectedCategory = 'Anak / Orang Hilang';
+        let isSimulasiMode = true;
+        let holdTimer = null;
+        let holdStartTime = 0;
+        const HOLD_DURATION = 3000; // 3 Seconds
+        let audioCtx = null;
+        let sirenOscillator = null;
+        let sirenGain = null;
+        let activeEmergencyData = null;
+        let emergencyStepInterval = null;
+
+        // Sound Siren Web Audio API Synthesis
+        function playSirenSound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                sirenOscillator = audioCtx.createOscillator();
+                sirenGain = audioCtx.createGain();
+
+                sirenOscillator.type = 'sawtooth';
+                sirenGain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+                // Modulate frequency for police/siren effect
+                const now = audioCtx.currentTime;
+                sirenOscillator.frequency.setValueAtTime(600, now);
+                sirenOscillator.frequency.linearRampToValueAtTime(1200, now + 0.5);
+                sirenOscillator.frequency.linearRampToValueAtTime(600, now + 1.0);
+
+                sirenOscillator.connect(sirenGain);
+                sirenGain.connect(audioCtx.destination);
+
+                sirenOscillator.start();
+                sirenOscillator.stop(now + 4.0); // Play for 4s
+            } catch (e) {
+                console.log("Audio synthesis limited or blocked by user gesture:", e);
+            }
+        }
+
+        function stopSirenSound() {
+            if (sirenOscillator) {
+                try {
+                    sirenOscillator.stop();
+                } catch(e) {}
+            }
+        }
+
+        // Category selection
+        function selectCategory(category, element) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-2', 'border-siaga-500', 'bg-siaga-950/40');
+                btn.classList.add('border-2', 'border-slate-800', 'bg-slate-800/50');
+            });
+            element.classList.remove('border-slate-800', 'bg-slate-800/50');
+            element.classList.add('active', 'border-2', 'border-siaga-500', 'bg-siaga-950/40');
+
+            document.getElementById('selectedCategoryBadge').innerText = category;
+        }
+
+        // Toggle Simulasi Mode
+        function toggleModeSimulasi(checkbox) {
+            isSimulasiMode = checkbox.checked;
+            const title = document.getElementById('modeTitleText');
+            const desc = document.getElementById('modeDescText');
+
+            if (isSimulasiMode) {
+                title.innerText = "Mode Latihan / Simulasi";
+                desc.innerText = "Sirine aman, sinyal hanya dites di HP ini.";
+            } else {
+                title.innerText = "Mode REAL / DARURAT SUNGGUHAN";
+                desc.innerText = "PERINGATAN: Sinyal akan menyalakan sirine warga radius 1km!";
+            }
+        }
+
+        // Panic Button Hold 3 Seconds Logic
+        function startHold(e) {
+            if (e && e.type === 'touchstart') e.preventDefault();
+
+            holdStartTime = Date.now();
+            const circle = document.getElementById('holdProgressCircle');
+            const maxOffset = 502;
+
+            // Animate SVG Circle offset over 3 seconds
+            circle.style.transition = 'stroke-dashoffset 3000ms linear';
+            circle.style.strokeDashoffset = '0';
+
+            holdTimer = setTimeout(() => {
+                triggerEmergency();
+            }, HOLD_DURATION);
+        }
+
+        function endHold() {
+            clearTimeout(holdTimer);
+            const circle = document.getElementById('holdProgressCircle');
+            circle.style.transition = 'stroke-dashoffset 200ms ease-out';
+            circle.style.strokeDashoffset = '502';
+        }
+
+        // Trigger Emergency Overlay & Sequence (3-5 seconds)
+        function triggerEmergency() {
+            endHold();
+            playSirenSound();
+
+            const overlay = document.getElementById('emergencyOverlay');
+            document.getElementById('activeCategoryTitle').innerText = selectedCategory;
+
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+            }, 10);
+
+            // Reset Overlay Steps Visual
+            resetSteps();
+
+            // Run 3-5 seconds sequence
+            let secondsLeft = 5;
+            const timerText = document.getElementById('overlayTimerText');
+
+            // Sample simulated transcripts based on category
+            const sampleTranscripts = {
+                'Anak / Orang Hilang': '"Tolong, anak saya umur 5 tahun, baju merah celana biru hilang di sekitar pos ronda RT 03!"',
+                'Maling / Kejahatan': '"Ada orang mencurigakan masuk halaman rumah Blok A12, tolong bantu ketuk kentongan!"',
+                'Kebakaran': '"Asap tebal keluar dari dapur Blok B No 4, butuh bantuan warga secepatnya membawa APAR!"',
+                'Medis / Ambulans': '"Butuh bantuan pertolongan pertama, lansia pingsan butuh ambulans darurat di Blok A/12."'
+            };
+
+            const transcriptText = sampleTranscripts[selectedCategory] || '"Tolong butuh bantuan darurat di lokasi saya sekarang!"';
+
+            // Start step interval
+            let step = 1;
+            emergencyStepInterval = setInterval(() => {
+                step++;
+                secondsLeft--;
+                if (secondsLeft >= 0) {
+                    timerText.innerText = `00:0${secondsLeft}`;
+                }
+
+                if (step === 2) {
+                    activateStepVisual('step2', 'step2Icon');
+                } else if (step === 3) {
+                    activateStepVisual('step3', 'step3Icon');
+                } else if (step === 4 || step === 5) {
+                    activateStepVisual('step4', 'step4Icon');
+                    document.getElementById('liveTranscriptText').innerText = transcriptText;
+                }
+
+                if (step >= 5) {
+                    clearInterval(emergencyStepInterval);
+                }
+            }, 1000);
+
+            // Store metadata
+            activeEmergencyData = {
+                id: 'LOG-' + Date.now(),
+                timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
+                category: selectedCategory,
+                mode: isSimulasiMode ? 'Simulasi' : 'REAL',
+                location: 'RT 03 / RW 05 - Blok A No. 12',
+                transcript: transcriptText
+            };
+        }
+
+        function activateStepVisual(stepId, iconId) {
+            const el = document.getElementById(stepId);
+            const icon = document.getElementById(iconId);
+            if (el && icon) {
+                el.classList.remove('opacity-40');
+                icon.classList.remove('bg-slate-800', 'text-slate-400');
+                icon.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/40');
+                icon.innerText = '✓';
+            }
+        }
+
+        function resetSteps() {
+            ['step2', 'step3', 'step4'].forEach((stepId, idx) => {
+                const el = document.getElementById(stepId);
+                const icon = document.getElementById(stepId + 'Icon');
+                if (el && icon) {
+                    el.classList.add('opacity-40');
+                    icon.className = "w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-[10px] border border-slate-700";
+                    icon.innerText = idx + 2;
+                }
+            });
+            document.getElementById('liveTranscriptText').innerText = '"Merekam audio & mendeteksi suara..."';
+        }
+
+        // Cancel Overlay
+        function cancelEmergency() {
+            stopSirenSound();
+            clearInterval(emergencyStepInterval);
+            const overlay = document.getElementById('emergencyOverlay');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 300);
+        }
+
+        // Save Record to LocalDevice & Render History
+        function saveAndComplete() {
+            stopSirenSound();
+            clearInterval(emergencyStepInterval);
+
+            if (activeEmergencyData) {
+                // Get existing history from LocalStorage
+                let history = JSON.parse(localStorage.getItem('siagaqu_logs') || '[]');
+                history.unshift(activeEmergencyData);
+                localStorage.setItem('siagaqu_logs', JSON.stringify(history));
+
+                renderHistory();
+            }
+
+            cancelEmergency();
+            alert(`Sinyal & Transkrip Suara Berhasil Disimpan Ke Local Device!\n\nAuto-Create Group ChatQu: "DARURAT: [${selectedCategory}] - Hendriana"`);
+            switchTab('history', document.querySelectorAll('.nav-btn')[2]);
+        }
+
+        // Render History Items
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+            let history = JSON.parse(localStorage.getItem('siagaqu_logs') || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-500 text-xs bg-slate-800/30 rounded-2xl border border-slate-800">
+                        Belum ada log sinyal darurat tersimpan.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 rounded-full ${item.mode === 'Simulasi' ? 'bg-amber-400' : 'bg-siaga-500'}"></span>
+                            <span class="text-xs font-extrabold text-white">${item.category}</span>
+                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-700 text-slate-300 font-medium">${item.mode}</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-mono">${item.date} • ${item.timestamp}</span>
+                    </div>
+
+                    <div class="text-xs text-slate-300 italic bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                        ${item.transcript}
+                    </div>
+
+                    <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1">
+                        <span>📍 ${item.location}</span>
+                        <span class="text-emerald-400 font-bold">Saved LocalDevice ✓</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            if (confirm("Hapus semua log riwayat darurat dari perangkat ini?")) {
+                localStorage.removeItem('siagaqu_logs');
+                renderHistory();
+            }
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-siaga-500');
+                btn.classList.add('text-slate-500');
+            });
+            element.classList.remove('text-slate-500');
+            element.classList.add('text-siaga-500');
+
+            document.getElementById('tabContentMain').classList.add('hidden');
+            document.getElementById('tabContentContacts').classList.add('hidden');
+            document.getElementById('tabContentHistory').classList.add('hidden');
+
+            if (tabName === 'main') document.getElementById('tabContentMain').classList.remove('hidden');
+            if (tabName === 'contacts') document.getElementById('tabContentContacts').classList.remove('hidden');
+            if (tabName === 'history') {
+                document.getElementById('tabContentHistory').classList.remove('hidden');
+                renderHistory();
+            }
+        }
+
+        function addContact() {
+            const name = prompt("Masukkan Nama Kontak Darurat Baru:");
+            const phone = prompt("Masukkan Nomor Telepon / WA:");
+            if (name && phone) {
+                const container = document.getElementById('contactsContainer');
+                const newHtml = `
+                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold text-xs">
+                                ${name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white">${name}</div>
+                                <div class="text-[10px] text-slate-400">${phone} • Kontak Tambahan</div>
+                            </div>
+                        </div>
+                        <span class="text-[9px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-bold">Aktif</span>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', newHtml);
+            }
+        }
+
+        function goBackMain() {
+            alert("Kembali ke Beranda Modul RTQu / WargaQu");
+        }
+
+        // Initialize default view
+        window.onload = function() {
+            renderHistory();
+        };
+    </script>
+</body>
+</html>

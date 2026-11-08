@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="50%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#064e3b"/>
+    </linearGradient>
+    <linearGradient id="mintGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#022c22" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Background Base with Rounded Corners -->
+  <rect width="512" height="512" rx="112" fill="url(#emeraldGrad)"/>
+
+  <!-- Subtle Inner Glow Border -->
+  <rect x="12" y="12" width="488" height="488" rx="100" fill="none" stroke="#34d399" stroke-width="4" stroke-opacity="0.3"/>
+
+  <!-- Center Shield Icon of Protection & Unity -->
+  <g filter="url(#shadow)">
+    <!-- Outer Shield -->
+    <path d="M256 72 C336 72 396 112 396 112 C396 264 340 376 256 428 C172 376 116 264 116 112 C116 112 176 72 256 72 Z" fill="#064e3b" stroke="url(#mintGrad)" stroke-width="12" stroke-linejoin="round"/>
+    
+    <!-- Inner Stylized Monogram "W" (WargaQu) -->
+    <path d="M172 172 L212 316 L256 220 L300 316 L340 172" fill="none" stroke="url(#mintGrad)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Star of Siaga & Care on Top Center -->
+    <circle cx="256" cy="148" r="16" fill="#fde047"/>
+    <circle cx="256" cy="148" r="8" fill="#ffffff"/>
+  </g>
+
+  <!-- Small App Subtitle Accent -->
+  <text x="256" y="472" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#5eead4" text-anchor="middle" letter-spacing="4">WARGAQU</text>
+</svg>

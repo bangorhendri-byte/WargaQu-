@@ -1,0 +1,8 @@
+{
+  "name": "WargaQu 1.5.5",
+  "description": "Solusi Cerdas Untuk Semua",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

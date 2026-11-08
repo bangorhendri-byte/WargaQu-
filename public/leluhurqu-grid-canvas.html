@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>LeluhurQu - Grid Canvas Engine (PWA 100% Offline)</title>
+  <meta name="description" content="Spatial Grid Canvas Engine: Zero-Collision Matrix, Solusi Ayah Uyut Baru Ditemukan, 5 Elemen Presisi (Foto, Nama, Tahun, Domisili, Gelar), dan Klaim Urutan Silsilah by Akun.">
+  <meta name="theme-color" content="#047857">
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LeluhurQu">
+  
+  <link rel="manifest" href='data:application/manifest+json,{"id":"leluhurqu-grid-canvas","name":"LeluhurQu - Grid Canvas Engine","short_name":"LeluhurQu","description":"Spatial Grid Family Tree Canvas Engine Offline","start_url":".","display":"standalone","background_color":"#030712","theme_color":"#047857","icons":[{"src":"https://api.iconify.design/lucide:git-fork.svg?color=%2310b981","sizes":"192x192","type":"image/svg+xml"}]}'>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      touch-action: pan-x pan-y;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-mono-num { font-family: 'Space Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    @media print {
+      body { background: white !important; color: black !important; overflow: visible !important; }
+      header, aside, .no-print, #floating-toolbar, #floating-stats, #claim-banner { display: none !important; }
+      #canvas-wrapper { position: static !important; width: 100% !important; height: 100% !important; overflow: visible !important; background: white !important; }
+      svg { width: 100% !important; height: auto !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col h-screen overflow-hidden">
+
+  <!-- ========================================================================= -->
+  <!-- 1. TOP NAVBAR / HEADER -->
+  <!-- ========================================================================= -->
+  <header class="bg-slate-900 border-b border-slate-800 px-3 py-2 flex items-center justify-between z-30 shadow-md">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-emerald-600/30 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+        <svg class="w-5 h-5 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><circle cx="18" cy="6" r="3"></circle>
+          <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"></path><path d="M12 12v3"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-1.5">
+          <span class="font-extrabold text-sm sm:text-base text-white tracking-wide">LeluhurQu</span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            Grid Canvas Engine
+          </span>
+        </div>
+        <p class="text-[10px] text-slate-400 hidden sm:block">100% Offline • Zero Collision • Klaim Urutan Silsilah</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Tombol Solusi Ayah Uyut Baru Ditemukan -->
+      <button id="btn-open-uyut" class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition animate-pulse">
+        <svg class="w-4 h-4 text-amber-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+        <span class="hidden xs:inline">Ayah Uyut Ditemukan</span>
+      </button>
+
+      <!-- Fast Batch Input Button -->
+      <button id="btn-open-batch" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+        <span>Input Masal</span>
+      </button>
+
+      <!-- Claim Akun Button -->
+      <button id="btn-open-claim" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 active:scale-95 transition">
+        <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span class="hidden sm:inline">Klaim Akun</span>
+      </button>
+
+      <!-- Auto Sort Birth Year Button -->
+      <button id="btn-auto-sort-birth" class="px-2.5 py-1.5 rounded-lg bg-amber-600/90 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow active:scale-95 transition border border-amber-500/40" title="Solusi Salah Urutan: Urutkan Kakek, Ayah, Anak per Tahun Lahir (Tua ke Muda)">
+        <svg class="w-4 h-4 text-amber-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span class="hidden sm:inline">Urutkan Thn Lahir</span>
+      </button>
+
+      <!-- Print / PDF Button -->
+      <button id="btn-print" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span class="hidden md:inline">Cetak / PDF</span>
+      </button>
+
+      <button id="btn-toggle-sidebar" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Panel Pengaturan">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 2. QUICK TOOLBAR: COMPACT HORIZONTAL SCROLLABLE CHIPS (MOBILE FRIENDLY) -->
+  <!-- ========================================================================= -->
+  <div class="bg-slate-900/95 backdrop-blur border-b border-slate-800 px-2.5 py-1.5 flex items-center gap-2 text-xs z-20 overflow-x-auto no-scrollbar whitespace-nowrap">
+    <!-- Tombol Rapikan Otomatis (Dynamic Tree Spacing & Auto Centering) -->
+    <button id="btn-auto-layout" class="shrink-0 px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition border border-emerald-500/40" title="Rapikan Otomatis: Susun ulang silsilah dengan kalkulasi lebar sub-tree & auto-centering bebas bentrok">
+      <svg class="w-3.5 h-3.5 text-emerald-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <span>Rapikan Otomatis</span>
+    </button>
+
+    <!-- Jenis Garis: Mode Horizontal Chips / Pills -->
+    <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
+      <span class="text-slate-400 px-1 text-[11px] font-medium flex items-center gap-1">
+        <svg class="w-3 h-3 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+        <span>Garis:</span>
+      </span>
+      <button class="line-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition flex items-center gap-1" data-line="orthogonal" title="Paralel Siku Bebas Nabrak (Collision-Free Corridor)">
+        <span>Siku</span>
+      </button>
+      <button class="line-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition flex items-center gap-1" data-line="bezier" title="Lengkung Bezier">
+        <span>Bezier</span>
+      </button>
+      <button class="line-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition flex items-center gap-1" data-line="linear" title="Seri Lurus Langsung">
+        <span>Lurus</span>
+      </button>
+    </div>
+
+    <!-- Bentuk Node Chips -->
+    <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
+      <span class="text-slate-400 px-1 text-[11px] font-medium">Bentuk:</span>
+      <button class="shape-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition" data-shape="card">Kotak</button>
+      <button class="shape-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition" data-shape="circle">Bulat</button>
+      <button class="shape-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition" data-shape="hexagon">Hexa</button>
+    </div>
+
+    <!-- Skin Selector Chips -->
+    <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
+      <span class="text-slate-400 px-1 text-[11px] font-medium">Skin:</span>
+      <button class="skin-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition" data-skin="simple" title="Hanya Muncul Nama Saja">Simple</button>
+      <button class="skin-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition" data-skin="pill" title="Kapsul Ramping">Kapsul</button>
+      <button class="skin-btn px-2 py-0.5 rounded text-[11px] font-medium text-slate-300 hover:text-white transition" data-skin="detailed" title="5 Atribut Lengkap">Lengkap</button>
+    </div>
+
+    <!-- Ukuran Kanvas Preset -->
+    <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
+      <span class="text-slate-400 px-1 text-[11px] font-medium">Kertas:</span>
+      <select id="select-paper-size" class="bg-slate-900 text-slate-200 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+        <option value="autofit">Auto-Fit</option>
+        <option value="A0">A0</option>
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="A3">A3</option>
+        <option value="A4">A4</option>
+        <option value="F4">F4 (Folio)</option>
+      </select>
+    </div>
+
+    <!-- Auto Sort Birth Year -->
+    <button id="btn-auto-sort-birth" class="shrink-0 px-2 py-1 rounded-lg bg-amber-600/90 hover:bg-amber-500 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs active:scale-95 transition border border-amber-500/40" title="Urutkan Kakek, Ayah, Anak per Tahun Lahir">
+      <span>⚡ Urut Thn Lahir</span>
+    </button>
+
+    <!-- Canvas Zoom Controls -->
+    <div class="flex items-center gap-1 shrink-0 ml-auto">
+      <button id="btn-zoom-out" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200" title="Zoom Out">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+      </button>
+      <span id="label-zoom" class="text-[11px] font-mono-num w-10 text-center text-slate-300">95%</span>
+      <button id="btn-zoom-in" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200" title="Zoom In">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+      </button>
+      <button id="btn-reset-view" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200" title="Auto-Fit">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Claim Banner -->
+  <div id="claim-banner" class="bg-amber-950/40 border-b border-amber-500/30 px-3 py-1 flex items-center justify-between text-xs text-amber-200 z-10 hidden">
+    <div class="flex items-center gap-1.5">
+      <span class="text-amber-400">⭐</span>
+      <span id="claim-banner-text">Akun Diklaim: <strong>-</strong></span>
+    </div>
+    <button id="btn-manage-claim" class="text-[11px] text-amber-300 underline hover:text-white">Kelola Klaim</button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. MAIN SVG CANVAS AREA -->
+  <!-- ========================================================================= -->
+  <div id="canvas-wrapper" class="flex-1 relative overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing">
+    <svg id="svg-canvas" class="w-full h-full select-none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+          <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.35" flood-color="#000000" />
+        </filter>
+        <!-- Dynamic Infinite Coordinate Grid Matrix (40px cells) -->
+        <pattern id="matrix-subgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <circle cx="20" cy="20" r="0.75" fill="#334155" opacity="0.4" />
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5" stroke-opacity="0.3" />
+        </pattern>
+      </defs>
+      
+      <g id="scene-group" transform="translate(40, 40) scale(0.95)">
+        <rect id="layer-infinite-grid" x="-4000" y="-4000" width="16000" height="16000" fill="url(#matrix-subgrid)" pointer-events="none"></rect>
+        <g id="layer-paper-bounds"></g>
+        <g id="layer-grid-guides"></g>
+        <g id="layer-snap-target"></g>
+        <g id="layer-connectors"></g>
+        <g id="layer-nodes"></g>
+      </g>
+    </svg>
+
+    <div id="floating-stats" class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-2 text-xs flex items-center gap-3 shadow-lg pointer-events-auto">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="stat-total-nodes" class="font-bold text-slate-200">6 Anggota</span>
+      </div>
+      <span class="text-slate-600">|</span>
+      <span id="stat-grid-size" class="text-slate-400 font-mono-num">3 Gen • 4 Kol</span>
+      <span class="text-slate-600">|</span>
+      <span class="text-emerald-400 font-semibold">Zero Collision</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 4. SIDEBAR -->
+  <!-- ========================================================================= -->
+  <aside id="sidebar" class="fixed top-12 right-0 bottom-0 w-80 sm:w-96 bg-slate-900 border-l border-slate-800 p-4 overflow-y-auto z-40 shadow-2xl flex flex-col gap-4 transform translate-x-full transition-transform duration-200">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+      <h3 class="font-bold text-white text-base">Pengaturan Grid Canvas</h3>
+      <button id="btn-close-sidebar" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">✕</button>
+    </div>
+
+    <!-- Multi Skin Bagan -->
+    <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
+      <div class="font-bold text-amber-400 text-xs uppercase flex items-center gap-1.5">
+        <span>🎨</span>
+        <span>Multi-Skin Tampilan Bagan</span>
+      </div>
+      <p class="text-[11px] text-slate-400 leading-relaxed">
+        Pilih mode tampilan node: Simple (hanya nama saja tanpa atribut lain) atau Lengkap (5 atribut).
+      </p>
+      <div class="grid grid-cols-1 gap-1.5 pt-1">
+        <button class="skin-btn w-full p-2 rounded-lg text-left text-xs transition border border-slate-800 hover:border-amber-500/50 flex items-center justify-between" data-skin="simple">
+          <div>
+            <div class="font-bold text-slate-100 flex items-center gap-1.5">
+              <span>Simple (Hanya Nama Saja)</span>
+              <span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono">Paling Bersih</span>
+            </div>
+            <div class="text-[10px] text-slate-400">Hanya menampilkan nama lengkap &amp; nomor dot-notation</div>
+          </div>
+        </button>
+        <button class="skin-btn w-full p-2 rounded-lg text-left text-xs transition border border-slate-800 hover:border-amber-500/50 flex items-center justify-between" data-skin="pill">
+          <div>
+            <div class="font-bold text-slate-100">Kapsul (Pill Minimalis)</div>
+            <div class="text-[10px] text-slate-400">Badge horizontal ramping dengan nama saja</div>
+          </div>
+        </button>
+        <button class="skin-btn w-full p-2 rounded-lg text-left text-xs transition border border-slate-800 hover:border-amber-500/50 flex items-center justify-between" data-skin="detailed">
+          <div>
+            <div class="font-bold text-slate-100">Lengkap (5 Atribut)</div>
+            <div class="text-[10px] text-slate-400">Foto, Gelar Bapak/Ibu, Nama, Lahir-Wafat, Domisili</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Solusi Ayah Uyut -->
+    <div class="p-3 bg-amber-950/40 border border-amber-600/40 rounded-xl space-y-2">
+      <div class="font-bold text-amber-300 text-xs uppercase flex items-center gap-1.5">
+        <span>👑</span>
+        <span>Solusi Ayah Uyut Ditemukan</span>
+      </div>
+      <p class="text-[11px] text-amber-200/80 leading-relaxed">
+        Sisipkan kakek buyut / leluhur puncak baru di Generasi 1. Seluruh generasi di bawahnya otomatis diturunkan.
+      </p>
+      <button id="btn-sidebar-uyut" class="w-full py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition shadow">
+        Sisipkan Ayah Uyut di Puncak
+      </button>
+    </div>
+
+    <!-- Cetak & Ekspor -->
+    <div class="space-y-2 border-t border-slate-800 pt-3">
+      <label class="text-xs font-bold text-slate-300 uppercase tracking-wider">Cetak & Ekspor</label>
+      <button id="btn-sidebar-print" class="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow transition">
+        <span>Cetak / Ekspor PDF Presisi</span>
+      </button>
+      <button id="btn-export-svg" class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition">
+        <span>Unduh File Bagan SVG</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- 5. MODAL: SOLUSI AYAH UYUT BARU DITEMUKAN -->
+  <!-- ========================================================================= -->
+  <div id="modal-uyut" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-amber-500/50 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-white text-base">Solusi: Ayah Uyut Baru Ditemukan</h3>
+        <button id="btn-close-uyut" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="p-3 bg-amber-950/40 rounded-xl border border-amber-500/30 text-xs text-amber-200">
+        <strong>Zero-Collision Prepend:</strong> Ayah Uyut akan ditempatkan di puncak (Generasi 1). Seluruh generasi saat ini otomatis diturunkan +1 baris ke bawah, dan nomor dot-notation dihitung ulang secara berantai.
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="font-semibold text-slate-300 block mb-1">Gelar</label>
+            <select id="uyut-honorific" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-slate-200">
+              <option value="Bapak H.">Bapak H.</option>
+              <option value="Bapak">Bapak</option>
+              <option value="Ibu Hj.">Ibu Hj.</option>
+              <option value="Ibu">Ibu</option>
+              <option value="Eyang">Eyang</option>
+              <option value="Raden">Raden</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="font-semibold text-slate-300 block mb-1">Nama Lengkap Ayah Uyut *</label>
+            <input type="text" id="uyut-name" value="Kyai Raden H. Masduki" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-semibold text-slate-300 block mb-1">Tahun Lahir - Wafat</label>
+            <input type="text" id="uyut-birthdeath" value="1885 - 1952" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100">
+          </div>
+          <div>
+            <label class="font-semibold text-slate-300 block mb-1">Kota / Domisili</label>
+            <input type="text" id="uyut-domicile" value="Kuningan, Jawa Barat" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100">
+          </div>
+        </div>
+
+        <div>
+          <label className="font-semibold text-slate-300 block mb-1">Pilih Anak dari Ayah Uyut Ini:</label>
+          <div id="uyut-children-list" class="space-y-1.5 max-h-36 overflow-y-auto p-2 bg-slate-950 rounded-xl border border-slate-800">
+            <!-- Checkbox list of current roots -->
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button id="btn-cancel-uyut" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">Batal</button>
+        <button id="btn-submit-uyut" class="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg">Sisipkan di Puncak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 6. MODAL: FAST BATCH (ENTRY AWAL DEFAULT / BEBAS) -->
+  <!-- ========================================================================= -->
+  <div id="modal-batch" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl text-slate-100">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-white text-base">Input Massal (Bebas / Default)</h3>
+        <button id="btn-close-batch" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-semibold text-slate-300 block mb-1">Pilih Induk / Posisi:</label>
+          <select id="batch-parent-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200">
+            <!-- options -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-semibold text-slate-300 block mb-1">Gelar Default</label>
+            <select id="batch-honorific" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-slate-200">
+              <option value="Bapak">Bapak</option>
+              <option value="Ibu">Ibu</option>
+              <option value="Bapak H.">Bapak H.</option>
+              <option value="Ibu Hj.">Ibu Hj.</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-semibold text-slate-300 block mb-1">Domisili Default</label>
+            <input type="text" id="batch-domicile" value="Kuningan, Jawa Barat" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-slate-200">
+          </div>
+        </div>
+
+        <div>
+          <label class="font-semibold text-slate-300 block mb-1">Daftar Nama (Dipisah Koma):</label>
+          <textarea id="batch-names-input" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 resize-none" placeholder="Contoh: Rian Pratama, Anisa Rahma, Hendra Gunawan, Putri Melati"></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button id="btn-cancel-batch" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">Batal</button>
+        <button id="btn-submit-batch" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">Tambahkan Massal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 7. MODAL: KLAIM URUTAN SILSILAH BY AKUN -->
+  <!-- ========================================================================= -->
+  <div id="modal-claim" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-amber-500/50 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl text-slate-100">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-white text-base">Klaim Urutan Silsilah by Akun</h3>
+        <button id="btn-close-claim" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-semibold text-slate-300 block mb-1">Nama Akun Pengguna:</label>
+          <input type="text" id="claim-username" value="Hendri (Akun Saya)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100">
+        </div>
+
+        <div>
+          <label class="font-semibold text-slate-300 block mb-1">Pilih Posisi Anda di Silsilah:</label>
+          <select id="claim-node-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200">
+            <!-- options -->
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button id="btn-unclaim" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs">Lepas Klaim</button>
+        <button id="btn-save-claim" class="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs">Simpan Klaim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 8. MODAL: KELOLA & KOREKSI URUTAN ANGGOTA (ANAK / AYAH / KAKEK) -->
+  <!-- ========================================================================= -->
+  <div id="modal-node-detail" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl text-slate-100">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-xs" id="detail-node-code">1.1</span>
+          <div>
+            <h3 class="font-bold text-white text-base" id="detail-node-name">Nama Anggota</h3>
+            <p class="text-xs text-slate-400" id="detail-node-role">Generasi 2 • Kolom 1</p>
+          </div>
+        </div>
+        <button id="btn-close-detail" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <!-- Kotak Solusi Salah Urutan Silsilah -->
+      <div class="bg-slate-950 p-3 rounded-xl border border-amber-500/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <span>⇄</span>
+            <span>Koreksi Urutan Silsilah / Saudara:</span>
+          </div>
+          <span class="text-[10px] text-slate-400 font-mono" id="detail-node-parent-info">-</span>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-tight">
+          Tukar nomor urut & posisi dengan saudara kandung sebelah jika urutan anak/ayah keliru:
+        </p>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button id="btn-swap-prev" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold flex items-center justify-center gap-1 border border-slate-700 transition active:scale-95">
+            <span>◀ Lebih Tua</span>
+          </button>
+          <button id="btn-swap-next" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold flex items-center justify-center gap-1 border border-slate-700 transition active:scale-95">
+            <span>Lebih Muda ▶</span>
+          </button>
+        </div>
+
+        <button id="btn-sort-my-children" class="w-full py-2 px-3 bg-amber-950/60 hover:bg-amber-900 border border-amber-600/50 text-amber-200 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95">
+          <span>⚡ Urutkan Anak-Anak per Tahun Lahir</span>
+        </button>
+      </div>
+
+      <!-- Informasi Atribut Anggota -->
+      <div class="space-y-2 text-xs bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+        <div class="flex justify-between py-1 border-b border-slate-900">
+          <span class="text-slate-400">Tahun Lahir/Wafat:</span>
+          <span class="font-medium text-slate-200" id="detail-node-birthdeath">-</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-slate-900">
+          <span class="text-slate-400">Kota / Domisili:</span>
+          <span class="font-medium text-slate-200" id="detail-node-domicile">-</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span class="text-slate-400">Status Akun:</span>
+          <span class="font-medium text-amber-400" id="detail-node-claim">-</span>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button id="btn-claim-this-node" class="flex-1 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs">⭐ Klaim Akun</button>
+        <button id="btn-delete-node" class="py-2 px-3 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-700/60 text-red-300 font-semibold text-xs">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed bottom-6 right-6 bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <span id="toast-text">Notifikasi</span>
+  </div>
+
+  <!-- CORE JAVASCRIPT -->
+  <script>
+    const CELL_WIDTH = 220;
+    const CELL_HEIGHT = 150;
+    const GRID_START_X = 80;
+    const GRID_START_Y = 110;
+
+    const COLOR_MAP = {
+      emerald: { bg: '#ecfdf5', border: '#059669', text: '#065f46', header: '#059669', ring: '#10b981' },
+      blue: { bg: '#eff6ff', border: '#2563eb', text: '#1e40af', header: '#2563eb', ring: '#3b82f6' },
+      purple: { bg: '#faf5ff', border: '#9333ea', text: '#6b21a8', header: '#9333ea', ring: '#a855f7' },
+      amber: { bg: '#fffbeb', border: '#d97706', text: '#92400e', header: '#d97706', ring: '#f59e0b' },
+      rose: { bg: '#fff1f2', border: '#e11d48', text: '#9f1239', header: '#e11d48', ring: '#f43f5e' }
+    };
+
+    let currentSkin = localStorage.getItem('leluhurqu_canvas_skin') || 'simple';
+    let currentShape = 'card';
+    let currentConnector = 'orthogonal';
+    let currentPaper = 'autofit';
+    let currentOrientation = 'landscape';
+    let zoom = 0.95;
+    let pan = { x: 30, y: 30 };
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+
+    let draggingNodeId = null;
+    let dragOffset = { x: 0, y: 0 };
+    let dragCurrentPos = { x: 0, y: 0 };
+    let hoverCell = null;
+
+    let claimedNodeId = localStorage.getItem('leluhurqu_claimed_node_id') || 'node-4';
+    let claimedUserName = localStorage.getItem('leluhurqu_claimed_user_name') || 'Hendri (Akun Saya)';
+
+    const defaultNodes = [
+      { id: 'node-1', name: 'Raden H. Kartasasmita', honorific: 'Bapak H.', dotNotation: '1', birthDeath: '1918 - 1989', domicile: 'Kuningan, Jawa Barat', gender: 'L', row: 0, col: 2, parentId: null, color: 'emerald', spouses: [{ name: 'Hj. Siti Rohimah', order: 1, note: 'Kuningan' }, { name: 'Hj. Endang Maryam', order: 2, note: 'Cirebon' }] },
+      { id: 'node-2', name: 'Drs. H. Ahmad Subarkah', honorific: 'Bapak H.', dotNotation: '1.1', birthDeath: '1945 - 2015', domicile: 'Bandung, Jawa Barat', gender: 'L', row: 1, col: 1, parentId: 'node-1', motherName: 'Hj. Siti Rohimah (Istri 1)', color: 'blue' },
+      { id: 'node-3', name: 'Hj. Dewi Komalasari', honorific: 'Ibu Hj.', dotNotation: '1.2', birthDeath: '1949 - Sekarang', domicile: 'Cirebon, Jawa Barat', gender: 'P', row: 1, col: 3, parentId: 'node-1', motherName: 'Hj. Endang Maryam (Istri 2)', color: 'purple' },
+      { id: 'node-4', name: 'Budi Santoso, S.T.', honorific: 'Bapak', dotNotation: '1.1.1', birthDeath: '1975 - Sekarang', domicile: 'Jakarta Selatan', gender: 'L', row: 2, col: 0, parentId: 'node-2', color: 'amber', claimedBy: 'Hendri (Akun Saya)' },
+      { id: 'node-5', name: 'dr. Siti Fauziyah, Sp.A', honorific: 'Ibu', dotNotation: '1.1.2', birthDeath: '1978 - Sekarang', domicile: 'Bogor, Jawa Barat', gender: 'P', row: 2, col: 1, parentId: 'node-2', color: 'rose' },
+      { id: 'node-6', name: 'Muhammad Farhan', honorific: 'Bapak', dotNotation: '1.2.1', birthDeath: '1982 - Sekarang', domicile: 'Kuningan, Jawa Barat', gender: 'L', row: 2, col: 3, parentId: 'node-3', color: 'blue' }
+    ];
+
+    let nodes = [];
+    try {
+      const saved = localStorage.getItem('leluhurqu_vanilla_nodes_v2');
+      nodes = saved ? JSON.parse(saved) : defaultNodes;
+    } catch(e) {
+      nodes = defaultNodes;
+    }
+
+    function saveNodes() {
+      try {
+        localStorage.setItem('leluhurqu_vanilla_nodes_v2', JSON.stringify(nodes));
+        if (claimedNodeId) {
+          localStorage.setItem('leluhurqu_claimed_node_id', claimedNodeId);
+        } else {
+          localStorage.removeItem('leluhurqu_claimed_node_id');
+        }
+        localStorage.setItem('leluhurqu_claimed_user_name', claimedUserName);
+      } catch(e) {}
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2500);
+    }
+
+    function getNodePosition(row, col) {
+      return { x: GRID_START_X + col * CELL_WIDTH, y: GRID_START_Y + row * CELL_HEIGHT };
+    }
+
+    function pixelToGrid(px, py) {
+      return {
+        col: Math.max(0, Math.round((px - GRID_START_X) / CELL_WIDTH)),
+        row: Math.max(0, Math.round((py - GRID_START_Y) / CELL_HEIGHT))
+      };
+    }
+
+    function isOccupied(row, col, excludeId = null) {
+      return nodes.some(n => n.row === row && n.col === col && n.id !== excludeId);
+    }
+
+    function recomputeDotNotation(currentNodes) {
+      const roots = currentNodes.filter(n => !n.parentId).sort((a, b) => a.col - b.col);
+      const updated = [...currentNodes];
+
+      function assignNotation(nodeId, notation) {
+        const idx = updated.findIndex(n => n.id === nodeId);
+        if (idx !== -1) updated[idx].dotNotation = notation;
+        const children = updated.filter(n => n.parentId === nodeId).sort((a, b) => a.col - b.col);
+        children.forEach((child, i) => assignNotation(child.id, `${notation}.${i + 1}`));
+      }
+
+      roots.forEach((root, idx) => assignNotation(root.id, `${idx + 1}`));
+      return updated;
+    }
+
+    function getClaimedLineageIds() {
+      const path = new Set();
+      let cur = nodes.find(n => n.id === claimedNodeId);
+      while (cur) {
+        path.add(cur.id);
+        cur = cur.parentId ? nodes.find(n => n.id === cur.parentId) : null;
+      }
+      return path;
+    }
+
+    function renderCanvas() {
+      const scene = document.getElementById('scene-group');
+      const layerGuides = document.getElementById('layer-grid-guides');
+      const layerSnap = document.getElementById('layer-snap-target');
+      const layerConnectors = document.getElementById('layer-connectors');
+      const layerNodes = document.getElementById('layer-nodes');
+
+      scene.setAttribute('transform', `translate(${pan.x}, ${pan.y}) scale(${zoom})`);
+      document.getElementById('label-zoom').textContent = `${Math.round(zoom * 100)}%`;
+
+      const maxRow = nodes.length > 0 ? Math.max(...nodes.map(n => n.row), 3) : 3;
+      const maxCol = nodes.length > 0 ? Math.max(...nodes.map(n => n.col), 4) : 4;
+      // Dynamic Infinite Grid Matrix (Auto-Expanding)
+      const gridTotalRows = Math.max(maxRow + 4, 8);
+      const gridTotalCols = Math.max(maxCol + 6, 12);
+
+      document.getElementById('stat-total-nodes').textContent = `${nodes.length} Anggota`;
+      document.getElementById('stat-grid-size').textContent = `${maxRow + 1} Gen • ${maxCol + 1} Kol (Infinite Grid)`;
+
+      // Update Claim Banner
+      const claimBanner = document.getElementById('claim-banner');
+      const claimNode = nodes.find(n => n.id === claimedNodeId);
+      if (claimNode) {
+        claimBanner.classList.remove('hidden');
+        document.getElementById('claim-banner-text').innerHTML = `Akun Anda: <strong>${claimNode.honorific || ''} ${claimNode.name}</strong> (No: ${claimNode.dotNotation}) • Gen ${claimNode.row + 1}`;
+      } else {
+        claimBanner.classList.add('hidden');
+      }
+
+      // Dynamic Infinite Matrix Grid Guides
+      let guidesHtml = '';
+      for (let r = 0; r <= gridTotalRows; r++) {
+        const y = GRID_START_Y + r * CELL_HEIGHT;
+        guidesHtml += `<text x="${GRID_START_X - 16}" y="${y + CELL_HEIGHT/2 + 4}" text-anchor="end" fill="#64748b" font-size="11" font-weight="bold" font-family="monospace">GEN ${r + 1}</text>`;
+        guidesHtml += `<line x1="${GRID_START_X - 10}" y1="${y}" x2="${GRID_START_X + (gridTotalCols + 1) * CELL_WIDTH}" y2="${y}" stroke="#1e293b" stroke-width="1" stroke-dasharray="3 3"/>`;
+      }
+      for (let c = 0; c <= gridTotalCols; c++) {
+        const x = GRID_START_X + c * CELL_WIDTH;
+        guidesHtml += `<text x="${x + CELL_WIDTH/2}" y="${GRID_START_Y - 14}" text-anchor="middle" fill="#475569" font-size="10" font-family="monospace">KOL ${c + 1}</text>`;
+      }
+      layerGuides.innerHTML = guidesHtml;
+
+      // Snap highlight
+      if (draggingNodeId && hoverCell) {
+        layerSnap.innerHTML = `
+          <rect x="${GRID_START_X + hoverCell.col * CELL_WIDTH + 8}" y="${GRID_START_Y + hoverCell.row * CELL_HEIGHT + 8}" width="${CELL_WIDTH - 16}" height="${CELL_HEIGHT - 16}" rx="14" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2.5" stroke-dasharray="4 4"/>
+          <text x="${GRID_START_X + hoverCell.col * CELL_WIDTH + CELL_WIDTH/2}" y="${GRID_START_Y + hoverCell.row * CELL_HEIGHT + CELL_HEIGHT/2 + 4}" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold" font-family="monospace">Snap: R${hoverCell.row + 1}:C${hoverCell.col + 1}</text>
+        `;
+      } else {
+        layerSnap.innerHTML = '';
+      }
+
+      // Connectors with Real-Time Drag Tracking & Collision-Free Corridor Routing
+      const claimedPath = getClaimedLineageIds();
+      let connectorsHtml = '';
+      nodes.forEach(child => {
+        if (!child.parentId) return;
+        const parent = nodes.find(n => n.id === child.parentId);
+        if (!parent) return;
+
+        // Dynamic Real-time coordinates during drag
+        const pPos = (parent.id === draggingNodeId && dragCurrentPos) ? dragCurrentPos : getNodePosition(parent.row, parent.col);
+        const cPos = (child.id === draggingNodeId && dragCurrentPos) ? dragCurrentPos : getNodePosition(child.row, child.col);
+        const pCenterX = pPos.x + CELL_WIDTH / 2;
+        const cCenterX = cPos.x + CELL_WIDTH / 2;
+
+        const isCompact = currentSkin === 'simple' || currentSkin === 'pill';
+        let pBottomY = pPos.y + CELL_HEIGHT - 22;
+        let cTopY = cPos.y + 12;
+
+        if (isCompact) {
+          if (currentSkin === 'pill') {
+            pBottomY = pPos.y + CELL_HEIGHT / 2 + 19;
+            cTopY = cPos.y + CELL_HEIGHT / 2 - 19;
+          } else if (currentShape === 'circle') {
+            pBottomY = pPos.y + CELL_HEIGHT / 2 + 42;
+            cTopY = cPos.y + CELL_HEIGHT / 2 - 42;
+          } else if (currentShape === 'hexagon') {
+            pBottomY = pPos.y + CELL_HEIGHT / 2 + 48;
+            cTopY = cPos.y + CELL_HEIGHT / 2 - 48;
+          } else {
+            pBottomY = pPos.y + CELL_HEIGHT / 2 + 27;
+            cTopY = cPos.y + CELL_HEIGHT / 2 - 27;
+          }
+        }
+
+        const isLineage = claimedPath.has(parent.id) && claimedPath.has(child.id);
+        const stroke = isLineage ? '#f59e0b' : '#334155';
+        const strokeW = isLineage ? '3.5' : '2';
+
+        if (currentConnector === 'linear') {
+          connectorsHtml += `<line x1="${pCenterX}" y1="${pBottomY}" x2="${cCenterX}" y2="${cTopY}" stroke="${stroke}" stroke-width="${strokeW}" stroke-linecap="round"/>`;
+          connectorsHtml += `<circle cx="${cCenterX}" cy="${cTopY}" r="${isLineage ? 5 : 3.5}" fill="${stroke}"/>`;
+        } else if (currentConnector === 'bezier') {
+          const midY = (pBottomY + cTopY) / 2;
+          const d = `M ${pCenterX} ${pBottomY} C ${pCenterX} ${midY}, ${cCenterX} ${midY}, ${cCenterX} ${cTopY}`;
+          connectorsHtml += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${strokeW}" stroke-linecap="round"/>`;
+          connectorsHtml += `<circle cx="${cCenterX}" cy="${cTopY}" r="${isLineage ? 5 : 3.5}" fill="${stroke}"/>`;
+        } else {
+          // ORTHOGONAL ROUTING: COLLISION-FREE CORRIDOR LOGIC
+          let d = '';
+          if (child.row === parent.row + 1) {
+            // Standard consecutive generation: Corridor between rows is 100% collision-free
+            const midY = (pBottomY + cTopY) / 2;
+            d = `M ${pCenterX} ${pBottomY} L ${pCenterX} ${midY} L ${cCenterX} ${midY} L ${cCenterX} ${cTopY}`;
+          } else if (child.row > parent.row + 1) {
+            // Non-adjacent / skipped generation: Route along safe inter-row corridor and vertical gutters
+            const gapExitY = pPos.y + CELL_HEIGHT - 6;
+            const gapEnterY = cPos.y + 6;
+            const hasIntervening = nodes.some(n =>
+              n.id !== parent.id && n.id !== child.id &&
+              n.col === child.col && n.row > parent.row && n.row < child.row
+            );
+
+            if (!hasIntervening) {
+              d = `M ${pCenterX} ${pBottomY} L ${pCenterX} ${gapExitY} L ${cCenterX} ${gapExitY} L ${cCenterX} ${cTopY}`;
+            } else {
+              const gutterCol = Math.max(parent.col, child.col) + 1;
+              const gutterX = GRID_START_X + gutterCol * CELL_WIDTH - 12;
+              d = `M ${pCenterX} ${pBottomY} L ${pCenterX} ${gapExitY} L ${gutterX} ${gapExitY} L ${gutterX} ${gapEnterY} L ${cCenterX} ${gapEnterY} L ${cCenterX} ${cTopY}`;
+            }
+          } else {
+            // Same row or higher row: loop around card boundary cleanly
+            const sideX = Math.max(pCenterX, cCenterX) + CELL_WIDTH / 2 + 12;
+            d = `M ${pCenterX} ${pBottomY} L ${pCenterX} ${pBottomY + 16} L ${sideX} ${pBottomY + 16} L ${sideX} ${cTopY - 16} L ${cCenterX} ${cTopY - 16} L ${cCenterX} ${cTopY}`;
+          }
+          connectorsHtml += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${strokeW}" stroke-linecap="round" stroke-linejoin="round"/>`;
+          connectorsHtml += `<circle cx="${cCenterX}" cy="${cTopY}" r="${isLineage ? 5 : 3.5}" fill="${stroke}"/>`;
+        }
+      });
+      layerConnectors.innerHTML = connectorsHtml;
+
+      // Nodes: MULTI SKIN (Simple: Hanya Nama, Kapsul, Lengkap 5 Atribut)
+      let nodesHtml = '';
+      nodes.forEach(node => {
+        const isDragging = draggingNodeId === node.id;
+        const pos = isDragging ? dragCurrentPos : getNodePosition(node.row, node.col);
+        const colors = COLOR_MAP[node.color || 'emerald'] || COLOR_MAP.emerald;
+        const isClaimed = claimedNodeId === node.id;
+        const honorific = node.honorific || (node.gender === 'P' ? 'Ibu' : 'Bapak');
+        const isFemale = node.gender === 'P';
+
+        let shapeContent = '';
+
+        if (currentSkin === 'simple') {
+          // ===============================================================
+          // SKIN: SIMPLE (HANYA MUNCUL NAMA SAJA TANPA ATRIBUT LAIN)
+          // ===============================================================
+          if (currentShape === 'circle') {
+            const r = 42;
+            const cx = CELL_WIDTH / 2;
+            const cy = CELL_HEIGHT / 2;
+            shapeContent = `
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="${isClaimed ? '#f59e0b' : colors.border}" stroke-width="${isClaimed ? 3 : 1.8}" filter="url(#shadow)"/>
+              <rect x="${cx - 20}" y="${cy - r - 8}" width="40" height="16" rx="8" fill="${isClaimed ? '#d97706' : colors.header}"/>
+              <text x="${cx}" y="${cy - r + 3.5}" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="bold" font-family="monospace">${node.dotNotation}</text>
+              <text x="${cx}" y="${cy + 4}" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="bold">${node.name.length > 17 ? node.name.slice(0, 15) + '..' : node.name}</text>
+              ${isClaimed ? `<text x="${cx}" y="${cy + 19}" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-weight="bold">★ Akun Saya</text>` : ''}
+            `;
+          } else if (currentShape === 'hexagon') {
+            const cx = CELL_WIDTH / 2;
+            const cy = CELL_HEIGHT / 2;
+            const r = 48;
+            const pts = [];
+            for (let i = 0; i < 6; i++) {
+              const angle = (Math.PI / 3) * i;
+              pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+            }
+            shapeContent = `
+              <polygon points="${pts.join(' ')}" fill="#ffffff" stroke="${isClaimed ? '#f59e0b' : colors.border}" stroke-width="${isClaimed ? 3 : 1.8}" filter="url(#shadow)"/>
+              <rect x="${cx - 20}" y="${cy - r + 4}" width="40" height="15" rx="7.5" fill="${isClaimed ? '#d97706' : colors.header}"/>
+              <text x="${cx}" y="${cy - r + 15}" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="bold" font-family="monospace">${node.dotNotation}</text>
+              <text x="${cx}" y="${cy + 5}" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="bold">${node.name.length > 17 ? node.name.slice(0, 15) + '..' : node.name}</text>
+              ${isClaimed ? `<text x="${cx}" y="${cy + 20}" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-weight="bold">★ Akun Saya</text>` : ''}
+            `;
+          } else {
+            // Card Simple
+            const cardW = 186;
+            const cardH = 54;
+            const cardX = (CELL_WIDTH - cardW) / 2;
+            const cardY = (CELL_HEIGHT - cardH) / 2;
+            shapeContent = `
+              <rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="10" fill="#ffffff" stroke="${isClaimed ? '#f59e0b' : colors.border}" stroke-width="${isClaimed ? 2.5 : 1.5}" filter="url(#shadow)"/>
+              <path d="M ${cardX} ${cardY + 10} A 10 10 0 0 1 ${cardX + 10} ${cardY} L ${cardX + 10} ${cardY + cardH} L ${cardX} ${cardY + cardH - 10} Z" fill="${isClaimed ? '#f59e0b' : colors.header}"/>
+              <rect x="${cardX + 14}" y="${cardY + 6}" width="38" height="14" rx="7" fill="${isClaimed ? '#fef3c7' : colors.bg}"/>
+              <text x="${cardX + 33}" y="${cardY + 16.5}" text-anchor="middle" fill="${isClaimed ? '#b45309' : colors.text}" font-size="8.5" font-weight="bold" font-family="monospace">${node.dotNotation}</text>
+              ${isClaimed ? `<text x="${cardX + cardW - 12}" y="${cardY + 17}" text-anchor="end" fill="#f59e0b" font-size="9" font-weight="bold">★ Akun Saya</text>` : ''}
+              <text x="${cardX + 16}" y="${cardY + 36}" fill="#0f172a" font-size="12" font-weight="bold">${node.name.length > 20 ? node.name.slice(0, 18) + '..' : node.name}</text>
+            `;
+          }
+        } else if (currentSkin === 'pill') {
+          // ===============================================================
+          // SKIN: PILL (KAPSUL RAMPING)
+          // ===============================================================
+          const pillW = 186;
+          const pillH = 38;
+          const pillX = (CELL_WIDTH - pillW) / 2;
+          const pillY = (CELL_HEIGHT - pillH) / 2;
+          shapeContent = `
+            <rect x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="19" fill="#ffffff" stroke="${isClaimed ? '#f59e0b' : colors.border}" stroke-width="${isClaimed ? 2.5 : 1.5}" filter="url(#shadow)"/>
+            <rect x="${pillX + 5}" y="${pillY + 5}" width="32" height="28" rx="14" fill="${isClaimed ? '#f59e0b' : colors.header}"/>
+            <text x="${pillX + 21}" y="${pillY + 22.5}" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold" font-family="monospace">${node.dotNotation}</text>
+            <text x="${pillX + 44}" y="${pillY + 23.5}" fill="#0f172a" font-size="11.5" font-weight="bold">${node.name.length > 18 ? node.name.slice(0, 16) + '..' : node.name}</text>
+            ${isClaimed ? `<text x="${pillX + pillW - 12}" y="${pillY + 23.5}" text-anchor="end" fill="#f59e0b" font-size="10">★</text>` : ''}
+          `;
+        } else {
+          // ===============================================================
+          // SKIN: DETAILED (LENGKAP 5 ATRIBUT)
+          // ===============================================================
+          if (currentShape === 'circle') {
+            const r = 54;
+            const cx = CELL_WIDTH / 2;
+            const cy = CELL_HEIGHT / 2;
+            shapeContent = `
+              <circle cx="${cx}" cy="${cy}" r="${r + 6}" fill="none" stroke="${isClaimed ? '#f59e0b' : colors.ring}" stroke-width="${isClaimed ? 2.5 : 1.5}" stroke-dasharray="${isClaimed ? 'none' : '4 3'}"/>
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="${isClaimed ? '#f59e0b' : colors.border}" stroke-width="${isClaimed ? 3 : 2}" filter="url(#shadow)"/>
+              <rect x="${cx - 45}" y="${cy - r - 10}" width="90" height="18" rx="9" fill="${isClaimed ? '#d97706' : colors.header}"/>
+              <text x="${cx}" y="${cy - r + 3}" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold" font-family="monospace">${node.dotNotation} • ${honorific}</text>
+              <circle cx="${cx}" cy="${cy - 12}" r="16" fill="${isFemale ? '#fff1f2' : '#eff6ff'}" stroke="${isFemale ? '#f43f5e' : '#3b82f6'}" stroke-width="1.2"/>
+              <text x="${cx}" y="${cy - 7}" text-anchor="middle" fill="${isFemale ? '#e11d48' : '#1d4ed8'}" font-size="11" font-weight="bold">${node.name.charAt(0)}</text>
+              <text x="${cx}" y="${cy + 14}" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="bold">${node.name.length > 17 ? node.name.slice(0, 15) + '..' : node.name}</text>
+              <text x="${cx}" y="${cy + 26}" text-anchor="middle" fill="#64748b" font-size="8">${node.birthDeath || 'Tahun Lahir'}</text>
+              <text x="${cx}" y="${cy + 37}" text-anchor="middle" fill="#059669" font-size="7.5" font-weight="semibold">📍 ${node.domicile || 'Domisili'}</text>
+            `;
+          } else if (currentShape === 'hexagon') {
+            const cx = CELL_WIDTH / 2;
+            const cy = CELL_HEIGHT / 2;
+            const r = 58;
+            const pts = [];
+            for (let i = 0; i < 6; i++) {
+              const angle = (Math.PI / 3) * i;
+              pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+            }
+            shapeContent = `
+              <polygon points="${pts.join(' ')}" fill="#ffffff" stroke="${isClaimed ? '#f59e0b' : colors.border}" stroke-width="${isClaimed ? 3 : 2}" filter="url(#shadow)"/>
+              <rect x="${cx - 45}" y="${cy - r + 4}" width="90" height="17" rx="8.5" fill="${isClaimed ? '#d97706' : colors.header}"/>
+              <text x="${cx}" y="${cy - r + 16}" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold" font-family="monospace">${node.dotNotation} • ${honorific}</text>
+              <circle cx="${cx}" cy="${cy - 12}" r="15" fill="${isFemale ? '#fff1f2' : '#eff6ff'}" stroke="${isFemale ? '#f43f5e' : '#3b82f6'}" stroke-width="1.2"/>
+              <text x="${cx}" y="${cy - 7}" text-anchor="middle" fill="${isFemale ? '#e11d48' : '#1d4ed8'}" font-size="11" font-weight="bold">${node.name.charAt(0)}</text>
+              <text x="${cx}" y="${cy + 13}" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="bold">${node.name.length > 17 ? node.name.slice(0, 15) + '..' : node.name}</text>
+              <text x="${cx}" y="${cy + 25}" text-anchor="middle" fill="#64748b" font-size="8">${node.birthDeath || 'Tahun Lahir'}</text>
+              <text x="${cx}" y="${cy + 36}" text-anchor="middle" fill="#059669" font-size="7.5" font-weight="semibold">📍 ${node.domicile || 'Domisili'}</text>
+            `;
+          } else {
+            // Card
+            const cardW = 196;
+            const cardH = 118;
+            const cardX = (CELL_WIDTH - cardW) / 2;
+            const cardY = (CELL_HEIGHT - cardH) / 2;
+            shapeContent = `
+              <rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="12" fill="#ffffff" stroke="${isClaimed ? '#f59e0b' : colors.border}" stroke-width="${isClaimed ? 3 : 1.8}" filter="url(#shadow)"/>
+              <path d="M ${cardX} ${cardY + 12} A 12 12 0 0 1 ${cardX + 12} ${cardY} L ${cardX + cardW - 12} ${cardY} A 12 12 0 0 1 ${cardX + cardW} ${cardY + 12} L ${cardX + cardW} ${cardY + 26} L ${cardX} ${cardY + 26} Z" fill="${isClaimed ? '#d97706' : colors.header}"/>
+              <text x="${cardX + 8}" y="${cardY + 17}" fill="#ffffff" font-size="10" font-weight="bold" font-family="monospace">${node.dotNotation}</text>
+              <rect x="${cardX + cardW - 68}" y="${cardY + 4}" width="60" height="18" rx="9" fill="#ffffff" fill-opacity="0.25"/>
+              <text x="${cardX + cardW - 38}" y="${cardY + 16}" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold">${honorific}</text>
+              
+              <rect x="${cardX + 8}" y="${cardY + 34}" width="46" height="46" rx="8" fill="${isFemale ? '#fff1f2' : '#eff6ff'}" stroke="${isFemale ? '#f43f5e' : '#3b82f6'}" stroke-width="1.2"/>
+              <text x="${cardX + 31}" y="${cardY + 63}" text-anchor="middle" fill="${isFemale ? '#e11d48' : '#1d4ed8'}" font-size="18" font-weight="bold">${node.name.charAt(0)}</text>
+              
+              <text x="${cardX + 60}" y="${cardY + 48}" fill="#0f172a" font-size="11" font-weight="bold">${node.name.length > 18 ? node.name.slice(0, 16) + '..' : node.name}</text>
+              <text x="${cardX + 60}" y="${cardY + 63}" fill="#475569" font-size="9">📅 ${node.birthDeath || 'Tahun Lahir'}</text>
+              <text x="${cardX + 60}" y="${cardY + 77}" fill="#047857" font-size="8.5" font-weight="semibold">📍 ${node.domicile || 'Domisili'}</text>
+              ${node.spouses && node.spouses.length > 1 ? `<text x="${cardX + 60}" y="${cardY + 89}" fill="#e11d48" font-size="8" font-weight="bold">💍 Multi-Istri (${node.spouses.length})</text>` : node.motherName ? `<text x="${cardX + 60}" y="${cardY + 89}" fill="#7c3aed" font-size="8" font-weight="bold">🌸 Ibu: ${node.motherName.length > 15 ? node.motherName.slice(0, 13) + '..' : node.motherName}</text>` : ''}
+              
+              ${isClaimed ? `
+                <g transform="translate(${cardX + 8}, ${cardY + cardH - 24})">
+                  <rect width="180" height="18" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/>
+                  <text x="90" y="12" text-anchor="middle" fill="#b45309" font-size="8.5" font-weight="bold">⭐ AKUN SAYA: ${claimedUserName}</text>
+                </g>
+              ` : `
+                <g transform="translate(${cardX + 8}, ${cardY + cardH - 20})">
+                  <text fill="#94a3b8" font-size="8">Koordinat: R${node.row + 1}:C${node.col + 1}</text>
+                </g>
+              `}
+            `;
+          }
+        }
+
+        nodesHtml += `
+          <g id="svg-node-${node.id}" class="cursor-pointer" transform="translate(${pos.x}, ${pos.y})" data-node-id="${node.id}" opacity="${isDragging ? '0.85' : '1'}">
+            ${shapeContent}
+          </g>
+        `;
+      });
+      layerNodes.innerHTML = nodesHtml;
+    }
+
+    // Reorder & Birth Year Sorter Functions (Solusi Salah Urutan Anak / Ayah / Kakek)
+    function extractBirthYear(str) {
+      if (!str) return 9999;
+      const match = str.match(/\b(18\d{2}|19\d{2}|20\d{2})\b/);
+      return match ? parseInt(match[1], 10) : 9999;
+    }
+
+    function swapSiblingOrder(nodeId, direction) {
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node) return;
+      const siblings = nodes
+        .filter(n => n.parentId === node.parentId)
+        .sort((a, b) => a.col - b.col);
+      const idx = siblings.findIndex(n => n.id === nodeId);
+      if (idx === -1) return;
+
+      const targetIdx = direction === 'prev' ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= siblings.length) {
+        showToast(direction === 'prev' ? 'Sudah berada di urutan paling tua (kiri)' : 'Sudah berada di urutan paling muda (kanan)');
+        return;
+      }
+
+      const sibling = siblings[targetIdx];
+      const tempCol = node.col;
+      node.col = sibling.col;
+      sibling.col = tempCol;
+
+      nodes = recomputeDotNotation(nodes);
+      saveNodes();
+      renderCanvas();
+      openNodeDetailModal(node.id);
+      showToast(`Urutan berhasil ditukar: ${node.name} ⇄ ${sibling.name}`);
+    }
+
+    function sortChildrenByBirthYear(parentId) {
+      const children = nodes.filter(n => n.parentId === parentId);
+      if (children.length < 2) {
+        showToast('Memerlukan minimal 2 anak untuk diurutkan');
+        return;
+      }
+
+      const sorted = [...children].sort((a, b) => {
+        const yA = extractBirthYear(a.birthDeath);
+        const yB = extractBirthYear(b.birthDeath);
+        return yA - yB;
+      });
+
+      const cols = children.map(c => c.col).sort((a, b) => a - b);
+      sorted.forEach((child, i) => {
+        const orig = nodes.find(n => n.id === child.id);
+        if (orig) orig.col = cols[i];
+      });
+
+      nodes = recomputeDotNotation(nodes);
+      saveNodes();
+      renderCanvas();
+      if (activeSelectedNodeId) openNodeDetailModal(activeSelectedNodeId);
+      showToast(`⚡ Urutan ${children.length} anak berhasil diurutkan berdasarkan tahun lahir!`);
+    }
+
+    function sortAllTreeByBirthYear() {
+      const parentIds = Array.from(new Set(nodes.map(n => n.parentId)));
+      let countSorted = 0;
+
+      parentIds.forEach(pId => {
+        const siblings = nodes.filter(n => n.parentId === pId);
+        if (siblings.length >= 2) {
+          const sorted = [...siblings].sort((a, b) => {
+            const yA = extractBirthYear(a.birthDeath);
+            const yB = extractBirthYear(b.birthDeath);
+            return yA - yB;
+          });
+          const cols = siblings.map(s => s.col).sort((a, b) => a - b);
+          sorted.forEach((s, idx) => {
+            const target = nodes.find(n => n.id === s.id);
+            if (target) target.col = cols[idx];
+          });
+          countSorted++;
+        }
+      });
+
+      nodes = recomputeDotNotation(nodes);
+      saveNodes();
+      renderCanvas();
+      if (activeSelectedNodeId) openNodeDetailModal(activeSelectedNodeId);
+      showToast(`⚡ Selesai! Seluruh generasi (Kakek, Ayah, Anak) telah diurutkan berdasarkan tahun lahir.`);
+    }
+
+    // Dynamic Tree Spacing & Auto Centering (Rapikan Otomatis)
+    function autoLayoutTree() {
+      if (!nodes || nodes.length === 0) return;
+
+      // 1. Identify roots
+      const rootNodes = nodes.filter(n => !n.parentId || !nodes.some(p => p.id === n.parentId));
+      rootNodes.sort((a, b) => {
+        if (a.row !== b.row) return a.row - b.row;
+        return a.col - b.col;
+      });
+
+      function getChildren(nodeId) {
+        return nodes
+          .filter(n => n.parentId === nodeId)
+          .sort((a, b) => {
+            if (a.birthOrder !== undefined && b.birthOrder !== undefined) return a.birthOrder - b.birthOrder;
+            const yA = extractBirthYear(a.birthDeath);
+            const yB = extractBirthYear(b.birthDeath);
+            if (yA !== 9999 && yB !== 9999 && yA !== yB) return yA - yB;
+            return a.col - b.col;
+          });
+      }
+
+      // 2. Compute subtree span
+      const subtreeWidths = new Map();
+      function computeSubtreeWidth(nodeId) {
+        const children = getChildren(nodeId);
+        if (children.length === 0) {
+          subtreeWidths.set(nodeId, 1);
+          return 1;
+        }
+        let sumW = 0;
+        children.forEach(c => {
+          sumW += computeSubtreeWidth(c.id);
+        });
+        const finalW = Math.max(sumW, 1);
+        subtreeWidths.set(nodeId, finalW);
+        return finalW;
+      }
+      rootNodes.forEach(r => computeSubtreeWidth(r.id));
+
+      // 3. Assign row & col with Auto-Centering and Zero-Collision
+      const assignedPos = new Map();
+      const occupied = new Set();
+
+      function isCellTaken(r, c) {
+        return occupied.has(`${r},${c}`);
+      }
+
+      function takeCell(r, c) {
+        occupied.add(`${r},${c}`);
+      }
+
+      let currentRootStartCol = 1;
+
+      function layoutNode(nodeId, currentRow, startCol) {
+        const children = getChildren(nodeId);
+
+        if (children.length === 0) {
+          let col = startCol;
+          while (isCellTaken(currentRow, col)) {
+            col++;
+          }
+          assignedPos.set(nodeId, { row: currentRow, col });
+          takeCell(currentRow, col);
+          return col + 1;
+        }
+
+        // Layout all children subtrees side-by-side
+        let childCursorCol = startCol;
+        const placedChildCols = [];
+
+        children.forEach(child => {
+          const nextStart = layoutNode(child.id, currentRow + 1, childCursorCol);
+          const childPos = assignedPos.get(child.id);
+          if (childPos) placedChildCols.push(childPos.col);
+          childCursorCol = Math.max(nextStart, childPos ? childPos.col + 1 : childCursorCol);
+        });
+
+        // Auto-Centering: Center parent directly above the midpoint of children
+        const minC = Math.min(...placedChildCols);
+        const maxC = Math.max(...placedChildCols);
+        let centerCol = Math.round((minC + maxC) / 2);
+
+        while (isCellTaken(currentRow, centerCol)) {
+          centerCol++;
+        }
+
+        assignedPos.set(nodeId, { row: currentRow, col: centerCol });
+        takeCell(currentRow, centerCol);
+
+        return Math.max(childCursorCol, centerCol + 1);
+      }
+
+      rootNodes.forEach(root => {
+        currentRootStartCol = layoutNode(root.id, 0, currentRootStartCol) + 1;
+      });
+
+      // Update node positions
+      nodes.forEach(n => {
+        const p = assignedPos.get(n.id);
+        if (p) {
+          n.row = p.row;
+          n.col = p.col;
+        }
+      });
+
+      nodes = recomputeDotNotation(nodes);
+      saveNodes();
+      renderCanvas();
+      showToast('✨ Pohon silsilah berhasil dirapikan otomatis & seimbang (Auto-Centering)!');
+    }
+
+    // Modal Detail & Koreksi Urutan Logic
+    let activeSelectedNodeId = null;
+    const modalDetail = document.getElementById('modal-node-detail');
+
+    function openNodeDetailModal(nodeId) {
+      activeSelectedNodeId = nodeId;
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node) return;
+
+      document.getElementById('detail-node-code').textContent = node.dotNotation;
+      document.getElementById('detail-node-name').textContent = `${node.honorific || ''} ${node.name}`;
+      document.getElementById('detail-node-role').textContent = `Generasi ${node.row + 1} • Kolom ${node.col + 1}`;
+      document.getElementById('detail-node-birthdeath').textContent = node.birthDeath || 'Tahun Lahir - Wafat';
+      document.getElementById('detail-node-domicile').textContent = node.domicile || 'Domisili';
+      document.getElementById('detail-node-claim').textContent = node.claimedBy ? `★ Diklaim: ${node.claimedBy}` : 'Belum Diklaim';
+
+      const parent = node.parentId ? nodes.find(n => n.id === node.parentId) : null;
+      document.getElementById('detail-node-parent-info').textContent = parent ? `Anak dari: ${parent.name}` : 'Garis Puncak (Generasi 1)';
+
+      const hasChildren = nodes.some(n => n.parentId === node.id);
+      const btnSortKids = document.getElementById('btn-sort-my-children');
+      if (hasChildren) {
+        btnSortKids.classList.remove('hidden');
+      } else {
+        btnSortKids.classList.add('hidden');
+      }
+
+      modalDetail.classList.remove('hidden');
+    }
+
+    // Drag & Pan listeners with Click Detection
+    const canvasWrapper = document.getElementById('canvas-wrapper');
+    const svgCanvas = document.getElementById('svg-canvas');
+
+    let clickStartX = 0;
+    let clickStartY = 0;
+    let clickCandidateNodeId = null;
+
+    function getSvgCoordinates(clientX, clientY) {
+      const rect = svgCanvas.getBoundingClientRect();
+      return {
+        x: (clientX - rect.left - pan.x) / zoom,
+        y: (clientY - rect.top - pan.y) / zoom
+      };
+    }
+
+    canvasWrapper.addEventListener('mousedown', (e) => {
+      clickStartX = e.clientX;
+      clickStartY = e.clientY;
+      clickCandidateNodeId = null;
+
+      const nodeG = e.target.closest('[data-node-id]');
+      if (nodeG) {
+        const id = nodeG.getAttribute('data-node-id');
+        const node = nodes.find(n => n.id === id);
+        if (node) {
+          clickCandidateNodeId = id;
+          draggingNodeId = id;
+          const pos = getNodePosition(node.row, node.col);
+          const pt = getSvgCoordinates(e.clientX, e.clientY);
+          dragOffset = { x: pt.x - pos.x, y: pt.y - pos.y };
+          dragCurrentPos = { x: pos.x, y: pos.y };
+          hoverCell = { row: node.row, col: node.col };
+          renderCanvas();
+        }
+      } else {
+        isPanning = true;
+        panStart = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (draggingNodeId) {
+        const pt = getSvgCoordinates(e.clientX, e.clientY);
+        const newX = pt.x - dragOffset.x;
+        const newY = pt.y - dragOffset.y;
+        dragCurrentPos = { x: newX, y: newY };
+        hoverCell = pixelToGrid(newX + CELL_WIDTH / 2, newY + CELL_HEIGHT / 2);
+        renderCanvas();
+      } else if (isPanning) {
+        pan = { x: e.clientX - panStart.x, y: e.clientY - panStart.y };
+        renderCanvas();
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      const moveDistance = Math.hypot(e.clientX - clickStartX, e.clientY - clickStartY);
+
+      if (clickCandidateNodeId && moveDistance < 6) {
+        // Pure click: Open detail & reorder modal!
+        openNodeDetailModal(clickCandidateNodeId);
+      } else if (draggingNodeId && hoverCell) {
+        finishDrag(draggingNodeId, hoverCell.row, hoverCell.col);
+      }
+
+      clickCandidateNodeId = null;
+      draggingNodeId = null;
+      isPanning = false;
+      hoverCell = null;
+      renderCanvas();
+    });
+
+    // Mobile Touch Event Listeners (Fluid Touch Drag & Pan on Smartphones)
+    canvasWrapper.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        clickStartX = touch.clientX;
+        clickStartY = touch.clientY;
+        clickCandidateNodeId = null;
+
+        const nodeG = touch.target.closest ? touch.target.closest('[data-node-id]') : null;
+        if (nodeG) {
+          const id = nodeG.getAttribute('data-node-id');
+          const node = nodes.find(n => n.id === id);
+          if (node) {
+            clickCandidateNodeId = id;
+            draggingNodeId = id;
+            const pos = getNodePosition(node.row, node.col);
+            const pt = getSvgCoordinates(touch.clientX, touch.clientY);
+            dragOffset = { x: pt.x - pos.x, y: pt.y - pos.y };
+            dragCurrentPos = { x: pos.x, y: pos.y };
+            hoverCell = { row: node.row, col: node.col };
+            renderCanvas();
+          }
+        } else {
+          isPanning = true;
+          panStart = { x: touch.clientX - pan.x, y: touch.clientY - pan.y };
+        }
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        if (draggingNodeId) {
+          if (e.cancelable) e.preventDefault();
+          const pt = getSvgCoordinates(touch.clientX, touch.clientY);
+          const newX = pt.x - dragOffset.x;
+          const newY = pt.y - dragOffset.y;
+          dragCurrentPos = { x: newX, y: newY };
+          hoverCell = pixelToGrid(newX + CELL_WIDTH / 2, newY + CELL_HEIGHT / 2);
+          renderCanvas();
+        } else if (isPanning) {
+          if (e.cancelable) e.preventDefault();
+          pan = { x: touch.clientX - panStart.x, y: touch.clientY - panStart.y };
+          renderCanvas();
+        }
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', (e) => {
+      if (clickCandidateNodeId && draggingNodeId) {
+        const touch = e.changedTouches[0];
+        const moveDist = Math.hypot(touch.clientX - clickStartX, touch.clientY - clickStartY);
+        if (moveDist < 8) {
+          openNodeDetailModal(clickCandidateNodeId);
+        } else if (hoverCell) {
+          finishDrag(draggingNodeId, hoverCell.row, hoverCell.col);
+        }
+      } else if (draggingNodeId && hoverCell) {
+        finishDrag(draggingNodeId, hoverCell.row, hoverCell.col);
+      }
+      clickCandidateNodeId = null;
+      draggingNodeId = null;
+      isPanning = false;
+      hoverCell = null;
+      renderCanvas();
+    });
+
+    function finishDrag(nodeId, targetRow, targetCol) {
+      const currentNode = nodes.find(n => n.id === nodeId);
+      if (!currentNode) return;
+      const occupant = nodes.find(n => n.id !== nodeId && n.row === targetRow && n.col === targetCol);
+
+      if (occupant) {
+        occupant.row = currentNode.row;
+        occupant.col = currentNode.col;
+        currentNode.row = targetRow;
+        currentNode.col = targetCol;
+        showToast(`Bertukar posisi dengan ${occupant.name} (Zero Collision)`);
+      } else {
+        currentNode.row = targetRow;
+        currentNode.col = targetCol;
+        showToast(`Dipindah ke Baris ${targetRow + 1}, Kolom ${targetCol + 1}`);
+      }
+
+      nodes = recomputeDotNotation(nodes);
+      saveNodes();
+    }
+
+    // Modal Ayah Uyut Logic
+    const modalUyut = document.getElementById('modal-uyut');
+    function openUyutModal() {
+      const roots = nodes.filter(n => !n.parentId || n.row === 0);
+      let html = '';
+      roots.forEach(r => {
+        html += `
+          <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-900 cursor-pointer">
+            <input type="checkbox" name="uyut-child" value="${r.id}" checked class="rounded text-amber-600">
+            <span class="font-semibold text-slate-200">${r.dotNotation} - ${r.honorific || ''} ${r.name}</span>
+          </label>
+        `;
+      });
+      document.getElementById('uyut-children-list').innerHTML = html;
+      modalUyut.classList.remove('hidden');
+    }
+
+    document.getElementById('btn-open-uyut').addEventListener('click', openUyutModal);
+    document.getElementById('btn-sidebar-uyut').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('translate-x-full');
+      openUyutModal();
+    });
+    document.getElementById('btn-close-uyut').addEventListener('click', () => modalUyut.classList.add('hidden'));
+    document.getElementById('btn-cancel-uyut').addEventListener('click', () => modalUyut.classList.add('hidden'));
+
+    document.getElementById('btn-submit-uyut').addEventListener('click', () => {
+      const name = document.getElementById('uyut-name').value.trim();
+      if (!name) return alert('Nama Ayah Uyut wajib diisi');
+
+      const honorific = document.getElementById('uyut-honorific').value;
+      const birthDeath = document.getElementById('uyut-birthdeath').value.trim();
+      const domicile = document.getElementById('uyut-domicile').value.trim();
+
+      const checkedIds = Array.from(document.querySelectorAll('input[name="uyut-child"]:checked')).map(cb => cb.value);
+
+      // 1. Shift all existing nodes down by +1 row
+      const shifted = nodes.map(n => ({ ...n, row: n.row + 1 }));
+
+      const uyutId = `node-uyut-${Date.now()}`;
+      const newUyut = {
+        id: uyutId,
+        name,
+        honorific,
+        dotNotation: '1',
+        birthDeath,
+        domicile,
+        gender: 'L',
+        row: 0,
+        col: 2,
+        parentId: null,
+        color: 'emerald'
+      };
+
+      // 2. Link selected children
+      const updatedWithChildren = shifted.map(n => {
+        if (checkedIds.includes(n.id)) {
+          return { ...n, parentId: uyutId };
+        }
+        return n;
+      });
+
+      nodes = recomputeDotNotation([newUyut, ...updatedWithChildren]);
+      saveNodes();
+      modalUyut.classList.add('hidden');
+      renderCanvas();
+      showToast(`✨ Solusi Berhasil: Ayah Uyut ${name} disisipkan di Puncak!`);
+    });
+
+    // Modal Fast Batch Logic (Entry Awal Bebas / Default)
+    const modalBatch = document.getElementById('modal-batch');
+    document.getElementById('btn-open-batch').addEventListener('click', () => {
+      let html = `<option value="">⭐ [Entry Awal Bebas] Generasi Paling Atas / Root Mandiri</option>`;
+      nodes.forEach(n => {
+        html += `<option value="${n.id}">Anak dari: ${n.dotNotation} - ${n.honorific || ''} ${n.name}</option>`;
+      });
+      document.getElementById('batch-parent-select').innerHTML = html;
+      modalBatch.classList.remove('hidden');
+    });
+    document.getElementById('btn-close-batch').addEventListener('click', () => modalBatch.classList.add('hidden'));
+    document.getElementById('btn-cancel-batch').addEventListener('click', () => modalBatch.classList.add('hidden'));
+
+    document.getElementById('btn-submit-batch').addEventListener('click', () => {
+      const raw = document.getElementById('batch-names-input').value.trim();
+      if (!raw) return alert('Masukkan minimal 1 nama anggota');
+
+      const namesList = raw.split(',').map(s => s.trim()).filter(Boolean);
+      const parentId = document.getElementById('batch-parent-select').value;
+      const defaultHonorific = document.getElementById('batch-honorific').value;
+      const defaultDomicile = document.getElementById('batch-domicile').value.trim();
+
+      const parent = nodes.find(n => n.id === parentId);
+      const targetRow = parent ? parent.row + 1 : 0;
+      let startCol = parent ? parent.col : 0;
+      const colors = ['emerald', 'blue', 'purple', 'amber', 'rose'];
+
+      namesList.forEach((rawName, i) => {
+        let col = startCol + i;
+        while (isOccupied(targetRow, col)) col++;
+
+        let honorific = defaultHonorific;
+        let cleanName = rawName;
+        if (/^(Bapak|Bpk)\b/i.test(rawName)) {
+          honorific = 'Bapak';
+          cleanName = rawName.replace(/^(Bapak|Bpk)\.?\s*/i, '');
+        } else if (/^(Ibu|Bu)\b/i.test(rawName)) {
+          honorific = 'Ibu';
+          cleanName = rawName.replace(/^(Ibu|Bu)\.?\s*/i, '');
+        }
+
+        nodes.push({
+          id: `node-${Date.now()}-${i}`,
+          name: cleanName,
+          honorific,
+          dotNotation: '...',
+          birthDeath: 'Tahun Lahir - Wafat',
+          domicile: defaultDomicile,
+          gender: honorific.includes('Ibu') ? 'P' : 'L',
+          row: targetRow,
+          col,
+          parentId: parent ? parent.id : null,
+          color: colors[(nodes.length + i) % colors.length]
+        });
+      });
+
+      nodes = recomputeDotNotation(nodes);
+      saveNodes();
+      modalBatch.classList.add('hidden');
+      document.getElementById('batch-names-input').value = '';
+      renderCanvas();
+      showToast(`${namesList.length} anggota ditambahkan massal!`);
+    });
+
+    // Modal Claim Akun Logic
+    const modalClaim = document.getElementById('modal-claim');
+    function openClaimModal() {
+      let html = `<option value="">-- Belum Diklaim / Pilih Anggota --</option>`;
+      nodes.forEach(n => {
+        html += `<option value="${n.id}" ${n.id === claimedNodeId ? 'selected' : ''}>${n.dotNotation} - ${n.honorific || ''} ${n.name} (Gen ${n.row + 1})</option>`;
+      });
+      document.getElementById('claim-node-select').innerHTML = html;
+      document.getElementById('claim-username').value = claimedUserName;
+      modalClaim.classList.remove('hidden');
+    }
+
+    document.getElementById('btn-open-claim').addEventListener('click', openClaimModal);
+    document.getElementById('btn-manage-claim').addEventListener('click', openClaimModal);
+    document.getElementById('btn-close-claim').addEventListener('click', () => modalClaim.classList.add('hidden'));
+
+    document.getElementById('btn-save-claim').addEventListener('click', () => {
+      claimedUserName = document.getElementById('claim-username').value.trim() || 'Akun Saya';
+      claimedNodeId = document.getElementById('claim-node-select').value || null;
+      nodes.forEach(n => {
+        n.claimedBy = n.id === claimedNodeId ? claimedUserName : undefined;
+      });
+      saveNodes();
+      modalClaim.classList.add('hidden');
+      renderCanvas();
+      showToast('Klaim akun silsilah berhasil disimpan!');
+    });
+
+    document.getElementById('btn-unclaim').addEventListener('click', () => {
+      claimedNodeId = null;
+      nodes.forEach(n => n.claimedBy = undefined);
+      saveNodes();
+      modalClaim.classList.add('hidden');
+      renderCanvas();
+      showToast('Klaim akun dilepaskan');
+    });
+
+    // Skin Buttons
+    document.querySelectorAll('.skin-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentSkin = btn.dataset.skin;
+        try {
+          localStorage.setItem('leluhurqu_canvas_skin', currentSkin);
+        } catch(e) {}
+        updateButtons();
+        renderCanvas();
+        showToast(`Skin tampilan: ${currentSkin === 'simple' ? 'Simple (Hanya Nama Saja)' : currentSkin === 'pill' ? 'Kapsul Ramping' : 'Lengkap (5 Atribut)'}`);
+      });
+    });
+
+    // Shape & Line Buttons
+    document.querySelectorAll('.shape-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentShape = btn.dataset.shape;
+        updateButtons();
+        renderCanvas();
+      });
+    });
+
+    document.querySelectorAll('.line-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentConnector = btn.dataset.line;
+        updateButtons();
+        renderCanvas();
+      });
+    });
+
+    function updateButtons() {
+      // Multi-Skin buttons (toolbar & sidebar)
+      document.querySelectorAll('.skin-btn').forEach(b => {
+        const isMatch = b.dataset.skin === currentSkin;
+        if (b.classList.contains('w-full')) {
+          b.className = isMatch
+            ? 'skin-btn w-full p-2 rounded-lg text-left text-xs transition border border-amber-500 bg-amber-500/15 flex items-center justify-between ring-1 ring-amber-500/40'
+            : 'skin-btn w-full p-2 rounded-lg text-left text-xs transition border border-slate-800 hover:border-slate-700 bg-slate-900/50 flex items-center justify-between';
+        } else {
+          b.className = isMatch
+            ? 'skin-btn px-2 py-1 rounded bg-amber-600 text-white font-bold transition flex items-center gap-1 shadow'
+            : 'skin-btn px-2 py-1 rounded text-slate-300 hover:text-white transition flex items-center gap-1';
+        }
+      });
+
+      document.querySelectorAll('.shape-btn').forEach(b => {
+        b.className = b.dataset.shape === currentShape
+          ? 'shape-btn px-2 py-1 rounded bg-emerald-600 text-white font-bold transition'
+          : 'shape-btn px-2 py-1 rounded text-slate-300 hover:text-white transition';
+      });
+      document.querySelectorAll('.line-btn').forEach(b => {
+        b.className = b.dataset.line === currentConnector
+          ? 'line-btn px-2 py-1 rounded bg-indigo-600 text-white font-bold transition'
+          : 'line-btn px-2 py-1 rounded text-slate-300 hover:text-white transition';
+      });
+    }
+
+    // Zoom
+    document.getElementById('btn-zoom-in').addEventListener('click', () => { zoom = Math.min(2.5, zoom + 0.15); renderCanvas(); });
+    document.getElementById('btn-zoom-out').addEventListener('click', () => { zoom = Math.max(0.3, zoom - 0.15); renderCanvas(); });
+    document.getElementById('btn-reset-view').addEventListener('click', () => { zoom = 0.95; pan = { x: 30, y: 30 }; renderCanvas(); showToast('Tampilan diatur otomatis'); });
+
+    // Print & Sidebar
+    const doPrint = () => window.print();
+    document.getElementById('btn-print').addEventListener('click', doPrint);
+    document.getElementById('btn-sidebar-print').addEventListener('click', doPrint);
+    document.getElementById('btn-toggle-sidebar').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('translate-x-full'));
+    document.getElementById('btn-close-sidebar').addEventListener('click', () => document.getElementById('sidebar').classList.add('translate-x-full'));
+
+    // Export SVG
+    document.getElementById('btn-export-svg').addEventListener('click', () => {
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svgCanvas);
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `LeluhurQu-GridCanvas-${Date.now()}.svg`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Bagan SVG diunduh!');
+    });
+
+    // Tombol Rapikan Otomatis (Dynamic Tree Spacing & Auto Centering)
+    const btnAutoLayout = document.getElementById('btn-auto-layout');
+    if (btnAutoLayout) {
+      btnAutoLayout.addEventListener('click', autoLayoutTree);
+    }
+
+    // Auto-Sort Tree by Birth Year Button
+    const btnAutoSort = document.getElementById('btn-auto-sort-birth');
+    if (btnAutoSort) {
+      btnAutoSort.addEventListener('click', sortAllTreeByBirthYear);
+    }
+
+    // Modal Node Detail Actions
+    document.getElementById('btn-close-detail').addEventListener('click', () => modalDetail.classList.add('hidden'));
+    document.getElementById('btn-swap-prev').addEventListener('click', () => {
+      if (activeSelectedNodeId) swapSiblingOrder(activeSelectedNodeId, 'prev');
+    });
+    document.getElementById('btn-swap-next').addEventListener('click', () => {
+      if (activeSelectedNodeId) swapSiblingOrder(activeSelectedNodeId, 'next');
+    });
+    document.getElementById('btn-sort-my-children').addEventListener('click', () => {
+      if (activeSelectedNodeId) sortChildrenByBirthYear(activeSelectedNodeId);
+    });
+    document.getElementById('btn-claim-this-node').addEventListener('click', () => {
+      if (!activeSelectedNodeId) return;
+      claimedNodeId = activeSelectedNodeId;
+      const n = nodes.find(item => item.id === activeSelectedNodeId);
+      if (n) {
+        n.claimedBy = claimedUserName;
+        nodes.forEach(other => { if (other.id !== n.id) other.claimedBy = undefined; });
+        saveNodes();
+        renderCanvas();
+        openNodeDetailModal(n.id);
+        showToast(`⭐ Posisi ${n.name} diklaim sebagai akun Anda!`);
+      }
+    });
+    document.getElementById('btn-delete-node').addEventListener('click', () => {
+      if (!activeSelectedNodeId) return;
+      const n = nodes.find(item => item.id === activeSelectedNodeId);
+      if (!confirm(`Hapus anggota ${n ? n.name : ''}?`)) return;
+      nodes = nodes.filter(item => item.id !== activeSelectedNodeId);
+      nodes = recomputeDotNotation(nodes);
+      saveNodes();
+      modalDetail.classList.add('hidden');
+      renderCanvas();
+      showToast('Anggota berhasil dihapus');
+    });
+
+    updateButtons();
+    nodes = recomputeDotNotation(nodes);
+    renderCanvas();
+  </script>
+</body>
+</html>

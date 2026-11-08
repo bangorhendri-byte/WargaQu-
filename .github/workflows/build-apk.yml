@@ -1,0 +1,173 @@
+name: Build Android APK (Bakso Qu 1.0)
+
+on:
+  push:
+    branches: [ "**" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Package Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node.js (v22 LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 3. Set up JDK 21 dengan Gradle Cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: 4. Setup Android SDK Tools & Licenses
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0'
+
+      - name: 5. Prepare environment and debug keystore
+        run: |
+          # Siapkan .env
+          if [ ! -f .env ]; then
+            cp .env.example .env 2>/dev/null || touch .env
+          fi
+
+          # Buat debug keystore jika belum ada
+          mkdir -p ~/.android
+          if [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+            cp debug.keystore ~/.android/debug.keystore 2>/dev/null || true
+          elif [ ! -f debug.keystore ]; then
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            cp debug.keystore ~/.android/debug.keystore 2>/dev/null || true
+          fi
+
+      - name: 6. Install Dependencies & Build Web App
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+
+      - name: 7. Inisialisasi & Sinkronisasi Platform Android
+        run: |
+          # Inisialisasi platform android jika belum ada
+          if [ ! -f "android/gradlew" ]; then
+            echo "Membuat platform android native via Capacitor..."
+            rm -rf android
+            npx cap add android
+          fi
+
+          echo "Menyinkronkan aset web ke Android..."
+          npx cap sync android
+
+          # Konfigurasi variables.gradle ke SDK 35 yang kompatibel
+          cat << 'EOF' > android/variables.gradle
+          ext {
+              minSdkVersion = 24
+              compileSdkVersion = 35
+              targetSdkVersion = 35
+              androidxActivityVersion = '1.9.3'
+              androidxAppCompatVersion = '1.7.0'
+              androidxCoordinatorLayoutVersion = '1.2.0'
+              androidxCoreVersion = '1.15.0'
+              androidxFragmentVersion = '1.8.5'
+              coreSplashScreenVersion = '1.0.1'
+              androidxWebkitVersion = '1.12.1'
+              junitVersion = '4.13.2'
+              androidxJunitVersion = '1.2.1'
+              androidxEspressoCoreVersion = '3.6.1'
+              cordovaAndroidVersion = '14.0.1'
+          }
+          EOF
+
+          # Konfigurasi gradle.properties optimal untuk CI
+          cat << 'EOF' > android/gradle.properties
+          org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+          org.gradle.daemon=false
+          org.gradle.parallel=false
+          android.useAndroidX=true
+          android.enableJetifier=true
+          android.builder.sdkDownload=true
+          EOF
+
+          # Beri izin eksekusi gradlew di root dan di folder android
+          chmod +x android/gradlew 2>/dev/null || true
+          chmod +x gradlew 2>/dev/null || true
+
+      - name: 8. Build APK with Gradle
+        run: |
+          chmod +x android/gradlew gradlew 2>/dev/null || true
+          if [ -f "./gradlew" ]; then
+            ./gradlew assembleDebug --no-daemon --stacktrace -x test -x lint
+          else
+            cd android
+            ./gradlew assembleDebug --no-daemon --stacktrace -x test -x lint
+            cd ..
+          fi
+
+      - name: 9. Siapkan File APK
+        run: |
+          mkdir -p output-apk
+          # Cari file APK dari build output dengan prioritas folder android
+          APK_FILE=""
+          if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            APK_FILE="android/app/build/outputs/apk/debug/app-debug.apk"
+          else
+            APK_FILE=$(find android/app/build/outputs/apk -type f -name "*.apk" 2>/dev/null | head -n 1)
+          fi
+
+          if [ -z "$APK_FILE" ]; then
+            APK_FILE=$(find . -type f -name "*debug.apk" -not -path "*/node_modules/*" 2>/dev/null | head -n 1)
+          fi
+
+          if [ -z "$APK_FILE" ]; then
+            APK_FILE=$(find . -type f -name "*.apk" -not -path "*/node_modules/*" 2>/dev/null | head -n 1)
+          fi
+
+          if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
+            cp "$APK_FILE" output-apk/BaksoQu-1.0.apk
+            echo "========================================="
+            echo "✅ APK Berhasil dibuat: output-apk/BaksoQu-1.0.apk"
+            echo "Ukuran File:"
+            ls -lh output-apk/BaksoQu-1.0.apk
+            echo "SHA256 Checksum:"
+            sha256sum output-apk/BaksoQu-1.0.apk
+            echo "========================================="
+          else
+            echo "❌ ERROR: File APK tidak ditemukan di build outputs!"
+            find . -name "*.apk" || true
+            exit 1
+          fi
+
+      - name: 10. Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BaksoQu-1.0-APK
+          path: output-apk/BaksoQu-1.0.apk
+          retention-days: 30
+
+      - name: 11. Publish GitHub Release (Direct Download APK)
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: latest
+          name: "WargaQu & BaksoQu POS v1.6.0"
+          body: |
+            ## Rilis Otomatis WargaQu & BaksoQu POS v1.6.0
+            - **Platform:** Android APK (Capacitor) & PWA Web
+            - **Auto-Update & Zero Data Loss:** Unduh dan pasang langsung menimpa versi sebelumnya tanpa kehilangan data.
+            - **File APK:** Unduh file `BaksoQu-1.0.apk` di bawah ini.
+          files: output-apk/BaksoQu-1.0.apk
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
