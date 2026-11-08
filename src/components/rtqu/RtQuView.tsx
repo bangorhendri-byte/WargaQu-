@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Settings,
@@ -68,6 +68,7 @@ type ModalType =
 export const RtQuView: React.FC<RtQuViewProps> = ({
   onBackToMain,
   onOpenUsahaQu,
+  onOpenSiagaQu,
   showNotification,
   currentUser = null,
   onOpenSecurityModal,

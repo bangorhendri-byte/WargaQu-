@@ -20,22 +20,22 @@
   }
 }
 
-/* Android Native Insets & Safe Area Support */
+/* Android Native Insets & Safe Area Support (Disesuaikan: Header naik 6mm, Navbar turun 6mm) */
 :root {
-  --android-safe-top: max(env(safe-area-inset-top, 0px), 36px);
-  --android-safe-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+  --android-safe-top: calc(max(env(safe-area-inset-top, 0px), 36px) - 6mm);
+  --android-safe-bottom: calc(max(env(safe-area-inset-bottom, 0px), 24px) - 6mm);
 }
 
 .android-header-safe {
-  padding-top: max(env(safe-area-inset-top, 0px), 38px) !important;
+  padding-top: calc(max(env(safe-area-inset-top, 0px), 38px) - 6mm) !important;
 }
 
 .android-navbar-safe {
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px) !important;
+  padding-bottom: calc(max(env(safe-area-inset-bottom, 0px), 24px) - 6mm) !important;
 }
 
 .android-scroll-safe {
-  padding-bottom: calc(max(env(safe-area-inset-bottom, 0px), 24px) + 7rem) !important;
+  padding-bottom: calc(max(env(safe-area-inset-bottom, 0px), 24px) + 7rem - 6mm) !important;
 }
 
 .font-mono-receipt {

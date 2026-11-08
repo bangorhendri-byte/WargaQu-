@@ -1,0 +1,131 @@
+{
+  "entities": {
+    "FamilyTree": {
+      "title": "FamilyTree",
+      "description": "LeluhurQu genealogy family tree space containing members and lineage",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "familyHead": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "EmergencySignal": {
+      "title": "EmergencySignal",
+      "description": "SiagaQu SOS emergency alert broadcast",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "userName", "type"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "ChatQu community instant message",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "senderId", "senderName", "text"]
+    },
+    "PosOrder": {
+      "title": "PosOrder",
+      "description": "UsahaQu POS live orders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tableId": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "total", "status"]
+    },
+    "PlatformSettings": {
+      "title": "PlatformSettings",
+      "description": "WargaQu Master Owner monetization and modular fee configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerEmail": { "type": "string" },
+        "thresholdQris": { "type": "number" },
+        "posRate": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id"]
+    },
+    "FeeLedger": {
+      "title": "FeeLedger",
+      "description": "Accumulated service fee ledger per merchant for Owner QRIS settlement",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "merchantId": { "type": "string" },
+        "merchantName": { "type": "string" },
+        "accumulatedFee": { "type": "number" },
+        "status": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "merchantId", "accumulatedFee"]
+    },
+    "PaymentSubmission": {
+      "title": "PaymentSubmission",
+      "description": "Merchant closing or fee settlement submission with unique payment code and proof note",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "merchantId": { "type": "string" },
+        "merchantName": { "type": "string" },
+        "baseAmount": { "type": "number" },
+        "uniqueCode": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "proofNote": { "type": "string" },
+        "proofImageUrl": { "type": "string" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "merchantId", "totalAmount", "status"]
+    }
+  },
+  "firestore": {
+    "/family_trees/{treeId}": {
+      "schema": "FamilyTree",
+      "description": "Private genealogy family trees"
+    },
+    "/emergency_signals/{signalId}": {
+      "schema": "EmergencySignal",
+      "description": "SiagaQu real-time neighborhood SOS signals"
+    },
+    "/chat_messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "ChatQu citizen discussion messages"
+    },
+    "/pos_orders/{orderId}": {
+      "schema": "PosOrder",
+      "description": "UsahaQu live POS transactions"
+    },
+    "/platform_settings/{settingId}": {
+      "schema": "PlatformSettings",
+      "description": "Master owner monetization settings"
+    },
+    "/fee_ledgers/{ledgerId}": {
+      "schema": "FeeLedger",
+      "description": "Service fee ledger for closing settlement"
+    },
+    "/payment_submissions/{submissionId}": {
+      "schema": "PaymentSubmission",
+      "description": "Manual fee payment tickets with unique 3-digit verification code"
+    }
+  }
+}

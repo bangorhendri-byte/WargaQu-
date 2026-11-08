@@ -56,11 +56,16 @@ import {
   Phone,
   Move,
   GripVertical,
-  LayoutGrid
+  LayoutGrid,
+  GitMerge,
+  Info,
+  Cloud
 } from 'lucide-react';
 import { GridCanvasEngine } from './GridCanvasEngine';
 import { UserAccount } from '../../types';
 import { AuthService } from '../../services/auth';
+import { RealtimeSyncService } from '../../services/realtimeSync';
+import { MonetizationService } from '../../services/monetization';
 
 interface LeluhurQuViewProps {
   onBackToWarga: () => void;
@@ -1657,6 +1662,7 @@ const UpscaleExportModalView: React.FC<UpscaleExportModalProps> = ({
             type="button"
             onClick={() => {
               window.print?.();
+              MonetizationService.recordTransaction(`silsilah_print_${Date.now()}`, 10000, 'silsilah');
               showNotification(`Membuka dialog cetak format Kertas ${paperSize}...`);
             }}
             className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 p-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition"
@@ -1843,6 +1849,91 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
   const [showShareModal, setShowShareModal] = useState(false);
   const [showNikMap, setShowNikMap] = useState<{ [cardId: string]: boolean }>({});
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importPreview, setImportPreview] = useState<{
+    incomingMembers: FamilyMember[];
+    incomingPosts?: any[];
+    newCount: number;
+    updateCount: number;
+    duplicateNames: string[];
+    fileName: string;
+  } | null>(null);
+
+  // Cloud Realtime State
+  const [cloudTreeId, setCloudTreeId] = useState<string>(() => RealtimeSyncService.getFamilyTreeId());
+  const [isCloudSyncing, setIsCloudSyncing] = useState<boolean>(false);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<'connected' | 'syncing' | 'offline'>('connected');
+  const [showCloudModal, setShowCloudModal] = useState<boolean>(false);
+  const [inputCloudId, setInputCloudId] = useState<string>('');
+  const isRemoteUpdateRef = useRef(false);
+
+  // Deteksi tautan undangan cloud tree dari URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const h = window.location.hash;
+      const matchTree = h.match(/cloudTree=([a-zA-Z0-9_\-]+)/i);
+      if (matchTree && matchTree[1]) {
+        const id = matchTree[1];
+        setCloudTreeId(id);
+        RealtimeSyncService.setFamilyTreeId(id);
+        showNotification(`Terhubung ke Ruang Silsilah Cloud: ${id}`);
+      }
+    }
+  }, []);
+
+  // Berlangganan (Subscribe) perubahan realtime dari Cloud
+  useEffect(() => {
+    const unsub = RealtimeSyncService.subscribeFamilyTree(
+      cloudTreeId,
+      (cloudData) => {
+        if (!cloudData) return;
+        if (Array.isArray(cloudData.members) && cloudData.members.length > 0) {
+          isRemoteUpdateRef.current = true;
+          setMembers(cloudData.members);
+          if (Array.isArray(cloudData.posts)) {
+            setPosts(cloudData.posts);
+          }
+          setCloudSyncStatus('connected');
+          setTimeout(() => {
+            isRemoteUpdateRef.current = false;
+          }, 400);
+        }
+      },
+      () => {
+        setCloudSyncStatus('offline');
+      }
+    );
+
+    return () => unsub();
+  }, [cloudTreeId]);
+
+  // Push otomatis ke Cloud ketika silsilah diedit lokal
+  useEffect(() => {
+    if (isRemoteUpdateRef.current) return;
+    if (members.length === 0) return;
+
+    const timer = setTimeout(() => {
+      setIsCloudSyncing(true);
+      setCloudSyncStatus('syncing');
+      RealtimeSyncService.pushFamilyTreeToCloud(
+        cloudTreeId,
+        'Silsilah Keluarga Besar',
+        currentUser?.name || 'Keluarga',
+        members,
+        posts,
+        currentUser?.name || 'Anda'
+      )
+        .then(() => {
+          setIsCloudSyncing(false);
+          setCloudSyncStatus('connected');
+        })
+        .catch(() => {
+          setIsCloudSyncing(false);
+        });
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [members, posts, cloudTreeId, currentUser]);
 
   // Form KK Header state
   const [formNoKk, setFormNoKk] = useState('');
@@ -3375,7 +3466,7 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
     showNotification('File cadangan silsilah (.json) berhasil diunduh!');
   };
 
-  // Import JSON Backup
+  // Import JSON Backup dengan Analisis Cerdas (Smart Merge & Anti-Konflik)
   const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -3384,11 +3475,53 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
       try {
         const parsed = JSON.parse(evt.target?.result as string);
         if (parsed.members && Array.isArray(parsed.members)) {
-          setMembers(parsed.members);
-          if (parsed.posts && Array.isArray(parsed.posts)) {
-            setPosts(parsed.posts);
+          const incoming = parsed.members as FamilyMember[];
+
+          // Jika silsilah saat ini masih kosong, langsung impor tanpa dialog
+          if (members.length === 0) {
+            setMembers(incoming);
+            if (parsed.posts && Array.isArray(parsed.posts)) {
+              setPosts(parsed.posts);
+            }
+            showNotification(`Berhasil memuat ${incoming.length} data keluarga dari file cadangan!`);
+            return;
           }
-          showNotification('Berhasil memulihkan data silsilah keluarga dari file cadangan!');
+
+          // Analisis Data untuk Smart Merge & Deteksi Nama Leluhur yang Sama
+          const existingIds = new Set(members.map(m => m.id));
+          const existingNameMap = new Map<string, number>();
+          members.forEach(m => {
+            const cleanName = m.name.trim().toLowerCase();
+            existingNameMap.set(cleanName, (existingNameMap.get(cleanName) || 0) + 1);
+          });
+
+          let newCount = 0;
+          let updateCount = 0;
+          const duplicateNames: string[] = [];
+
+          incoming.forEach(inc => {
+            if (existingIds.has(inc.id)) {
+              updateCount++;
+            } else {
+              newCount++;
+              const cleanName = inc.name.trim().toLowerCase();
+              if (existingNameMap.has(cleanName)) {
+                if (!duplicateNames.includes(inc.name)) {
+                  duplicateNames.push(inc.name);
+                }
+              }
+            }
+          });
+
+          setImportPreview({
+            incomingMembers: incoming,
+            incomingPosts: Array.isArray(parsed.posts) ? parsed.posts : undefined,
+            newCount,
+            updateCount,
+            duplicateNames,
+            fileName: file.name
+          });
+          setShowImportModal(true);
         } else {
           showNotification('Format file JSON tidak sesuai struktur LeluhurQu.');
         }
@@ -3397,6 +3530,81 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
       }
     };
     reader.readAsText(file);
+    // Reset file input agar bisa dipilih kembali jika perlu
+    e.target.value = '';
+  };
+
+  // Eksekusi Smart Merge: Gabungkan Kerabat Baru Tanpa Menghapus Data Lokal
+  const executeSmartMerge = () => {
+    if (!importPreview) return;
+    try {
+      // 1. Simpan auto-backup sebelum merge (Zero Data Loss)
+      localStorage.setItem('wargaqu_leluhur_pre_merge_backup', JSON.stringify({
+        timestamp: new Date().toISOString(),
+        members,
+        posts
+      }));
+
+      // 2. Gabungkan data anggota
+      const memberMap = new Map<string, FamilyMember>();
+      members.forEach(m => memberMap.set(m.id, { ...m }));
+
+      importPreview.incomingMembers.forEach(incoming => {
+        if (memberMap.has(incoming.id)) {
+          // Update data jika ID sama (pertahankan foto/nik lokal jika file cadangan kosong)
+          const existing = memberMap.get(incoming.id)!;
+          memberMap.set(incoming.id, {
+            ...existing,
+            ...incoming,
+            photo: incoming.photo || existing.photo,
+            nik: incoming.nik || existing.nik
+          });
+        } else {
+          // Tambahkan anggota baru
+          memberMap.set(incoming.id, incoming);
+        }
+      });
+
+      const mergedMembers = Array.from(memberMap.values());
+      setMembers(mergedMembers);
+
+      // 3. Gabungkan postingan linimasa jika ada
+      if (importPreview.incomingPosts && importPreview.incomingPosts.length > 0) {
+        const postMap = new Map<string, any>();
+        posts.forEach(p => postMap.set(p.id, p));
+        importPreview.incomingPosts.forEach(p => {
+          if (!postMap.has(p.id)) postMap.set(p.id, p);
+        });
+        setPosts(Array.from(postMap.values()));
+      }
+
+      setShowImportModal(false);
+      showNotification(`Alhamdulillah! Berhasil menggabungkan ${importPreview.newCount} anggota baru & ${importPreview.updateCount} data diperbarui tanpa kehilangan data lama.`);
+    } catch {
+      showNotification('Gagal melakukan penggabungan silsilah.');
+    }
+  };
+
+  // Eksekusi Gantikan Seluruhnya (Replace Total)
+  const executeReplaceAll = () => {
+    if (!importPreview) return;
+    try {
+      // Simpan backup darurat
+      localStorage.setItem('wargaqu_leluhur_pre_merge_backup', JSON.stringify({
+        timestamp: new Date().toISOString(),
+        members,
+        posts
+      }));
+
+      setMembers(importPreview.incomingMembers);
+      if (importPreview.incomingPosts) {
+        setPosts(importPreview.incomingPosts);
+      }
+      setShowImportModal(false);
+      showNotification('Seluruh data silsilah berhasil digantikan dengan data dari file cadangan.');
+    } catch {
+      showNotification('Gagal mengganti data.');
+    }
   };
 
   // Upload pas foto perorangan dengan auto-kompresi canvas
@@ -4199,9 +4407,17 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
                 Nasab &amp; Medsos
               </span>
             </div>
-            <p className="text-[10px] text-emerald-100 leading-none mt-0.5">
-              Ekosistem WargaQu • Offline-First
-            </p>
+            <button
+              onClick={() => setShowCloudModal(true)}
+              className="flex items-center gap-1 mt-0.5 text-[10px] text-emerald-100 hover:text-white transition active:scale-95 group"
+              title="Status Cloud Sync Realtime Silsilah Keluarga (Klik untuk Kelola)"
+            >
+              <span className={`w-2 h-2 rounded-full ${isCloudSyncing ? 'bg-amber-400 animate-ping' : cloudSyncStatus === 'connected' ? 'bg-[#5eead4] animate-pulse' : 'bg-slate-300'}`}></span>
+              <span className="font-semibold">{isCloudSyncing ? 'Syncing...' : 'Cloud Realtime'}</span>
+              <span className="text-[9px] bg-emerald-950/50 text-[#5eead4] px-1 rounded font-mono truncate max-w-[72px]">
+                {cloudTreeId.slice(0, 10)}
+              </span>
+            </button>
           </div>
         </div>
 
@@ -7328,6 +7544,252 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
                 className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
               >
                 Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL SMART MERGE & DETEKSI KONFLIK IMPORT */}
+      {showImportModal && importPreview && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative border border-emerald-100 text-slate-800 max-h-[90vh] overflow-y-auto no-scrollbar">
+            {/* Header Modal */}
+            <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shadow-xs">
+                  <GitMerge className="w-5 h-5 text-emerald-700" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900 leading-tight">Penggabungan Silsilah Cerdas</h3>
+                  <p className="text-[10px] text-emerald-700 font-bold">Smart Merge &amp; Anti-Konflik LeluhurQu</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Info File & Status Deteksi */}
+            <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2 text-xs">
+              <div className="flex items-center justify-between text-[11px] text-slate-500">
+                <span>File Cadangan:</span>
+                <span className="font-mono font-bold text-slate-800 truncate max-w-[180px]">{importPreview.fileName}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-center">
+                  <div className="text-xl font-black text-emerald-800">+{importPreview.newCount}</div>
+                  <div className="text-[10px] text-emerald-700 font-bold">Anggota Kerabat Baru</div>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 text-center">
+                  <div className="text-xl font-black text-blue-800">{importPreview.updateCount}</div>
+                  <div className="text-[10px] text-blue-700 font-bold">Data Diperbarui</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Deteksi Nama Leluhur yang Sama (Homonym) */}
+            {importPreview.duplicateNames.length > 0 && (
+              <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3 text-xs space-y-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                  <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Terdeteksi Nama yang Sama ({importPreview.duplicateNames.length}):</span>
+                </div>
+                <p className="text-[11px] text-amber-800 leading-relaxed">
+                  Nama: <strong>{importPreview.duplicateNames.slice(0, 4).join(', ')}{importPreview.duplicateNames.length > 4 ? ` (+${importPreview.duplicateNames.length - 4} lainnya)` : ''}</strong>.
+                </p>
+                <p className="text-[10px] text-amber-700 leading-snug">
+                  🛡️ <strong>Anti-Konflik:</strong> Di LeluhurQu setiap individu memakai <em>Unique ID (UUID/Timestamp)</em> sehingga sistem tidak akan menukar data. Anda dapat membedakan orang tua/anak/cucu bernama sama melalui <em>Bin/Binti</em>, <em>Tahun Lahir</em>, atau <em>Gelar Kekerabatan</em>.
+                </p>
+              </div>
+            )}
+
+            {/* Penjelasan Pilihan Tindakan */}
+            <div className="space-y-2 text-xs">
+              <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3 space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Opsi 1: Gabungkan Cerdas (Smart Merge)</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Menambahkan seluruh kerabat baru dari file tanpa menghapus kerabat yang sudah ada di HP Anda saat ini. Aman untuk pengeditan silsilah bersamaan.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1 text-slate-600">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                  <RefreshCw className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                  <span>Opsi 2: Gantikan Seluruhnya (Replace Total)</span>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  Menghapus silsilah yang ada di HP ini dan mengganti persis seperti isi file cadangan.
+                </p>
+              </div>
+            </div>
+
+            {/* Tombol Aksi */}
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={executeSmartMerge}
+                className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white font-bold text-xs py-3 rounded-2xl shadow-md transition flex items-center justify-center gap-2"
+              >
+                <GitMerge className="w-4 h-4 text-[#5eead4]" />
+                <span>Gabungkan Cerdas (Smart Merge - Disarankan)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={executeReplaceAll}
+                className="w-full bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 hover:border-rose-300 text-slate-700 font-bold text-xs py-2.5 rounded-2xl transition flex items-center justify-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Gantikan Seluruhnya (Replace Total)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowImportModal(false)}
+                className="w-full py-2 text-slate-400 hover:text-slate-600 text-xs font-semibold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL CLOUD REALTIME SYNC (FIREBASE FIRESTORE) */}
+      {showCloudModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative border border-emerald-100 text-slate-800 max-h-[90vh] overflow-y-auto no-scrollbar">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shadow-xs">
+                  <Cloud className="w-5 h-5 text-emerald-700" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900 leading-tight">Cloud Realtime Sync</h3>
+                  <p className="text-[10px] text-emerald-700 font-bold">Sinkronisasi Otomatis Antar-Keluarga</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCloudModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Status Card */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Status: Terhubung &amp; Aktif</span>
+                </span>
+                <span className="text-[10px] bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
+                  Firebase Firestore
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-800 leading-relaxed">
+                Setiap kali Anda atau kerabat Anda menambah/mengedit silsilah, perubahan akan langsung muncul otomatis di seluruh HP keluarga tanpa perlu kirim file ekspor-impor manual.
+              </p>
+            </div>
+
+            {/* Ruang Cloud ID Saat Ini */}
+            <div className="space-y-1.5 text-xs">
+              <label className="font-bold text-slate-700 flex items-center justify-between">
+                <span>Kode Ruang Cloud Silsilah Anda:</span>
+                <span className="text-[10px] text-emerald-700 font-semibold">Tersimpan Otomatis</span>
+              </label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  readOnly
+                  value={cloudTreeId}
+                  className="flex-1 p-2.5 bg-slate-100 font-mono text-xs font-bold rounded-xl border border-slate-200 text-slate-800 select-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(cloudTreeId);
+                    showNotification('Kode Ruang Cloud disalin ke clipboard!');
+                  }}
+                  className="px-3 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold flex items-center gap-1 active:scale-95 transition"
+                  title="Salin Kode Ruang Cloud"
+                >
+                  <Copy className="w-4 h-4" />
+                  <span>Salin</span>
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500">
+                Bagikan kode ini atau kirimkan Tautan Undangan Trah agar kerabat Anda otomatis tersambung ke pohon silsilah yang sama.
+              </p>
+            </div>
+
+            {/* Gabung ke Ruang Cloud Kerabat Lain */}
+            <div className="pt-2 border-t border-slate-100 space-y-1.5 text-xs">
+              <label className="font-bold text-slate-700">
+                Gabung ke Ruang Cloud Kerabat Lain:
+              </label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  placeholder="Contoh: trah-kuningan-utama"
+                  value={inputCloudId}
+                  onChange={(e) => setInputCloudId(e.target.value)}
+                  className="flex-1 p-2.5 bg-white text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-hidden font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!inputCloudId.trim()) return;
+                    const clean = inputCloudId.trim();
+                    setCloudTreeId(clean);
+                    RealtimeSyncService.setFamilyTreeId(clean);
+                    setInputCloudId('');
+                    showNotification(`Berhasil berpindah ke Ruang Cloud: ${clean}! Menarik data terbaru...`);
+                  }}
+                  className="px-3 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold active:scale-95 transition shrink-0"
+                >
+                  Hubungkan
+                </button>
+              </div>
+            </div>
+
+            {/* Tombol Aksi */}
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCloudSyncing(true);
+                  RealtimeSyncService.pushFamilyTreeToCloud(
+                    cloudTreeId,
+                    'Silsilah Keluarga Besar',
+                    currentUser?.name || 'Keluarga',
+                    members,
+                    posts,
+                    currentUser?.name || 'Anda'
+                  ).then(() => {
+                    setIsCloudSyncing(false);
+                    showNotification('Data silsilah lokal berhasil di-push ke Cloud!');
+                  });
+                }}
+                className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 active:scale-98 transition"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isCloudSyncing ? 'animate-spin' : ''}`} />
+                <span>Paksa Sinkronisasi Sekarang</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowCloudModal(false)}
+                className="w-full py-2 text-slate-500 hover:text-slate-700 font-semibold text-xs"
+              >
+                Tutup
               </button>
             </div>
           </div>

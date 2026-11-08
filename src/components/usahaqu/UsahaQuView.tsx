@@ -8,7 +8,9 @@ import {
   Store,
   ChevronRight,
   Headphones,
-  ShieldCheck
+  ShieldCheck,
+  Receipt,
+  QrCode
 } from 'lucide-react';
 
 import { HeaderBar } from '../HeaderBar';
@@ -24,6 +26,8 @@ import { OmsetDashboard } from '../omset/OmsetDashboard';
 import { LaporanView } from '../laporan/LaporanView';
 import { SettingView } from '../setting/SettingView';
 import { BluetoothModal } from '../BluetoothModal';
+import { OwnerQrisModal } from '../monetization/OwnerQrisModal';
+import { MonetizationService } from '../../services/monetization';
 
 import {
   TableItem,
@@ -61,6 +65,7 @@ interface UsahaQuViewProps {
   showNotification: (msg: string) => void;
   currentUser?: UserAccount | null;
   onOpenSecurityModal?: () => void;
+  onOpenMasterAdmin?: () => void;
 }
 
 export const UsahaQuView: React.FC<UsahaQuViewProps> = ({
@@ -84,11 +89,14 @@ export const UsahaQuView: React.FC<UsahaQuViewProps> = ({
   showNotification,
   currentUser,
   onOpenSecurityModal,
+  onOpenMasterAdmin,
 }) => {
   // Navigation State inside POS
   const [activeTab, setActiveTab] = useState<string>('kasir');
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isBluetoothModalOpen, setIsBluetoothModalOpen] = useState<boolean>(false);
+  const [showOwnerQrisModal, setShowOwnerQrisModal] = useState<boolean>(false);
+  const [qrisModalReason, setQrisModalReason] = useState<'threshold' | 'closing' | 'manual'>('closing');
 
   // Interactive Flow States
   const [selectedTableForAction, setSelectedTableForAction] = useState<TableItem | null>(null);
@@ -349,6 +357,19 @@ export const UsahaQuView: React.FC<UsahaQuViewProps> = ({
     StorageService.addTransaction(completedOrder);
     setHistory([completedOrder, ...history]);
 
+    // Catat fee platform secara silent di background & cek ambang batas Rp 10.000
+    try {
+      const feeRes = MonetizationService.recordTransaction(
+        completedOrder.id,
+        completedOrder.total,
+        'pos'
+      );
+      if (feeRes.triggerPopup) {
+        setQrisModalReason('threshold');
+        setShowOwnerQrisModal(true);
+      }
+    } catch {}
+
     const copyActive = { ...activeOrders };
     delete copyActive[completedOrder.id];
     setActiveOrders(copyActive);
@@ -470,6 +491,17 @@ export const UsahaQuView: React.FC<UsahaQuViewProps> = ({
               <Headphones className="w-3 h-3 text-[#5eead4]" />
             </button>
           )}
+          <button
+            onClick={() => {
+              setQrisModalReason('closing');
+              setShowOwnerQrisModal(true);
+            }}
+            className="text-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-xs active:scale-95 transition"
+            title="Closing Kasir & Setor Fee Platform ke QRIS Owner"
+          >
+            <QrCode className="w-3 h-3" />
+            <span>Closing</span>
+          </button>
           {currentUser && onOpenSecurityModal && (
             <button
               onClick={onOpenSecurityModal}
@@ -553,6 +585,7 @@ export const UsahaQuView: React.FC<UsahaQuViewProps> = ({
               StorageService.saveMenu(newMenu);
               showNotification('Daftar menu berhasil diperbarui.');
             }}
+            onOpenMasterAdmin={onOpenMasterAdmin}
           />
         )}
       </main>
@@ -657,6 +690,15 @@ export const UsahaQuView: React.FC<UsahaQuViewProps> = ({
         profile={profile}
         printerConfig={printerConfig}
         isKitchenSlip={receiptModalState.isKitchenSlip}
+      />
+
+      {/* Owner QRIS Interactive Modal for Fee Settlement */}
+      <OwnerQrisModal
+        isOpen={showOwnerQrisModal}
+        onClose={() => setShowOwnerQrisModal(false)}
+        reason={qrisModalReason}
+        merchantName="UsahaQu - Restoran Bakso Qu"
+        onSettledSuccess={() => showNotification('Setoran closing kasir berhasil dikonfirmasi!')}
       />
     </div>
   );

@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Silsilah Keluarga LeluhurQu - Family Trees
+    match /family_trees/{treeId} {
+      allow read, write: if true;
+    }
+
+    // Sinyal Darurat SiagaQu - SOS Realtime
+    match /emergency_signals/{signalId} {
+      allow read, write: if true;
+    }
+
+    // Pesan Koordinasi Warga - ChatQu Realtime
+    match /chat_messages/{messageId} {
+      allow read, write: if true;
+    }
+
+    // UsahaQu POS Kasir - Realtime Orders
+    match /pos_orders/{orderId} {
+      allow read, write: if true;
+    }
+
+    // Pengaturan Monetisasi Master Owner
+    match /platform_settings/{settingId} {
+      allow read, write: if true;
+    }
+
+    // Buku Kas Fee Layanan Akumulatif
+    match /fee_ledgers/{ledgerId} {
+      allow read, write: if true;
+    }
+
+    // Tiket Konfirmasi Setoran Kasir & Monetisasi Manual
+    match /payment_submissions/{submissionId} {
+      allow read, write: if true;
+    }
+
+    // Fallback default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

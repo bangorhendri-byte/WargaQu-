@@ -29,6 +29,7 @@ import {
 import { MenuItem, UserAccount } from '../../types';
 import { StorageService } from '../../services/storage';
 import { AuthService } from '../../services/auth';
+import { MonetizationService } from '../../services/monetization';
 
 interface MuamalahQuViewProps {
   onBackToMain: () => void;
@@ -475,6 +476,13 @@ export const MuamalahQuView: React.FC<MuamalahQuViewProps> = ({
       showNotification('Pilih setidaknya 1 item untuk checkout');
       return;
     }
+
+    const totalCheckoutAmount = selectedCartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+    MonetizationService.recordTransaction(
+      `muamalah_${Date.now()}`,
+      totalCheckoutAmount,
+      'muamalah'
+    );
 
     setShowOrderSuccessModal(true);
     // Remove checked out items from cart

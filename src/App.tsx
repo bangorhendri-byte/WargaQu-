@@ -28,6 +28,7 @@ import { AuthService } from './services/auth';
 import { UpdateService } from './services/update';
 import { LoginModal } from './components/auth/LoginModal';
 import { SecuritySettingsModal } from './components/auth/SecuritySettingsModal';
+import { MasterAdminModal } from './components/admin/MasterAdminModal';
 
 type AppScreen = 'warga' | 'leluhurqu' | 'rtqu' | 'siagaqu' | 'chatqu' | 'muamalahqu' | 'areaqu' | 'usahaqu' | 'modularqu' | 'bantuan' | 'setting' | 'empty_module';
 
@@ -39,6 +40,7 @@ export default function App() {
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [showSecurityModal, setShowSecurityModal] = useState<boolean>(false);
   const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false);
+  const [showMasterAdminModal, setShowMasterAdminModal] = useState<boolean>(false);
 
   // Screen Navigation State dengan dukungan Auto-Link Deep Navigation
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(() => {
@@ -139,10 +141,79 @@ export default function App() {
     };
 
     const onPopState = () => {
+      const h = window.location.hash.toLowerCase();
+      if (h.includes('rtqu')) {
+        setCurrentScreen('rtqu');
+        return;
+      }
+      if (h.includes('orbitqu') || h.includes('leluhurqu') || h.includes('silsilah')) {
+        setCurrentScreen('leluhurqu');
+        return;
+      }
+      if (h.includes('usahaqu') || h.includes('pos') || h.includes('kasir')) {
+        setCurrentScreen('usahaqu');
+        return;
+      }
+      if (h.includes('modularqu')) {
+        setCurrentScreen('modularqu');
+        return;
+      }
+      if (h.includes('siagaqu') || h.includes('sos')) {
+        setCurrentScreen('siagaqu');
+        return;
+      }
+      if (h.includes('chatqu')) {
+        setCurrentScreen('chatqu');
+        return;
+      }
+      if (h.includes('muamalahqu')) {
+        setCurrentScreen('muamalahqu');
+        return;
+      }
+      if (h.includes('areaqu')) {
+        setCurrentScreen('areaqu');
+        return;
+      }
+      if (h.includes('bantuan')) {
+        setCurrentScreen('bantuan');
+        return;
+      }
+      if (h.includes('setting')) {
+        setCurrentScreen('setting');
+        return;
+      }
       handleGlobalBack();
     };
 
+    const onHashChange = () => {
+      const h = window.location.hash.toLowerCase();
+      if (h.includes('rtqu')) {
+        setCurrentScreen('rtqu');
+      } else if (h.includes('orbitqu') || h.includes('leluhurqu') || h.includes('silsilah')) {
+        setCurrentScreen('leluhurqu');
+      } else if (h.includes('usahaqu') || h.includes('pos') || h.includes('kasir')) {
+        setCurrentScreen('usahaqu');
+      } else if (h.includes('modularqu')) {
+        setCurrentScreen('modularqu');
+      } else if (h.includes('siagaqu') || h.includes('sos')) {
+        setCurrentScreen('siagaqu');
+      } else if (h.includes('chatqu')) {
+        setCurrentScreen('chatqu');
+      } else if (h.includes('muamalahqu')) {
+        setCurrentScreen('muamalahqu');
+      } else if (h.includes('areaqu')) {
+        setCurrentScreen('areaqu');
+      } else if (h.includes('bantuan')) {
+        setCurrentScreen('bantuan');
+      } else if (h.includes('setting')) {
+        setCurrentScreen('setting');
+      } else if (h.includes('warga') || h === '' || h === '#') {
+        setCurrentScreen('warga');
+      }
+    };
+
     window.addEventListener('popstate', onPopState);
+    window.addEventListener('hashchange', onHashChange);
 
     let capListener: any = null;
     import('@capacitor/app')
@@ -159,6 +230,7 @@ export default function App() {
 
     return () => {
       window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('hashchange', onHashChange);
       if (capListener?.remove) {
         capListener.remove();
       }
@@ -174,6 +246,7 @@ export default function App() {
   const handleOpenRtQu = () => {
     setCurrentScreen('rtqu');
     window.history.pushState({ screen: 'rtqu' }, '', '#rtqu');
+    showNotification('Membuka RTQu: Layanan & Paguyuban RT 03');
   };
 
   const handleOpenSiagaQu = () => {
@@ -257,7 +330,7 @@ export default function App() {
     <AndroidFrame>
       {/* Pop-up Notification Toast across views */}
       {notification && (
-        <div className="absolute top-12 left-4 right-4 z-50 bg-emerald-950/95 text-[#5eead4] px-4 py-2 rounded-2xl shadow-xl border border-emerald-500/40 text-xs font-semibold flex items-center justify-between animate-in fade-in slide-in-from-top duration-200">
+        <div className="absolute top-[calc(3rem-6mm)] left-4 right-4 z-50 bg-emerald-950/95 text-[#5eead4] px-4 py-2 rounded-2xl shadow-xl border border-emerald-500/40 text-xs font-semibold flex items-center justify-between animate-in fade-in slide-in-from-top duration-200">
           <span>{notification}</span>
         </div>
       )}
@@ -281,6 +354,7 @@ export default function App() {
           onOpenSecurityModal={() => setShowSecurityModal(true)}
           onOpenLoginModal={() => setShowLoginModal(true)}
           onOpenUpdateModal={() => setShowUpdateModal(true)}
+          onOpenMasterAdmin={() => setShowMasterAdminModal(true)}
         />
       )}
 
@@ -299,6 +373,7 @@ export default function App() {
         <RtQuView
           onBackToMain={handleBackToWarga}
           onOpenUsahaQu={handleOpenUsahaQu}
+          onOpenSiagaQu={handleOpenSiagaQu}
           showNotification={showNotification}
           currentUser={currentUser}
           onOpenSecurityModal={() => setShowSecurityModal(true)}
@@ -376,6 +451,7 @@ export default function App() {
           showNotification={showNotification}
           currentUser={currentUser}
           onOpenSecurityModal={() => setShowSecurityModal(true)}
+          onOpenMasterAdmin={() => setShowMasterAdminModal(true)}
         />
       )}
 
@@ -425,6 +501,7 @@ export default function App() {
           }}
           onBackToWarga={handleBackToWarga}
           onOpenUpdateModal={() => setShowUpdateModal(true)}
+          onOpenMasterAdmin={() => setShowMasterAdminModal(true)}
         />
       )}
 
@@ -480,6 +557,13 @@ export default function App() {
         isOpen={showUpdateModal}
         onClose={() => setShowUpdateModal(false)}
         showToast={showNotification}
+      />
+
+      {/* Modal 4: WargaQu Master Admin HQ (Owner Gate, Fee Modular & QRIS) */}
+      <MasterAdminModal
+        isOpen={showMasterAdminModal}
+        onClose={() => setShowMasterAdminModal(false)}
+        showNotification={showNotification}
       />
     </AndroidFrame>
   );

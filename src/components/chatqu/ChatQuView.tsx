@@ -29,6 +29,7 @@ import {
 
 import { UserAccount } from '../../types';
 import { AuthService } from '../../services/auth';
+import { RealtimeSyncService } from '../../services/realtimeSync';
 
 interface ChatQuViewProps {
   onBackToMain: () => void;
@@ -270,13 +271,48 @@ export const ChatQuView: React.FC<ChatQuViewProps> = ({
     }
   }, [activeRoom?.messages]);
 
+  // Berlangganan pesan chat real-time via Cloud
+  useEffect(() => {
+    const unsub = RealtimeSyncService.subscribeChatMessages((cloudMsgs) => {
+      if (cloudMsgs.length > 0) {
+        setChats((prev) =>
+          prev.map((room) => {
+            if (room.id === 'group-1') {
+              const existingIds = new Set(room.messages.map((m) => m.id));
+              const newItems: MessageItem[] = cloudMsgs
+                .filter((cm) => !existingIds.has(cm.id))
+                .map((cm) => ({
+                  id: cm.id,
+                  sender: cm.senderName,
+                  isMe: cm.senderId === currentUser?.id,
+                  text: cm.text,
+                  time: new Date(cm.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  status: 'read'
+                }));
+              if (newItems.length > 0) {
+                const combined = [...room.messages, ...newItems];
+                return {
+                  ...room,
+                  messages: combined,
+                  lastMessage: newItems[newItems.length - 1].text || room.lastMessage
+                };
+              }
+            }
+            return room;
+          })
+        );
+      }
+    });
+    return () => unsub();
+  }, [currentUser]);
+
   // Send message handler
   const handleSendMessage = () => {
     if (!inputText.trim() || !activeRoom) return;
 
     const newMessage: MessageItem = {
       id: 'msg-' + Date.now(),
-      sender: 'Anda',
+      sender: currentUser?.name || 'Anda',
       isMe: true,
       text: inputText.trim(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -292,6 +328,15 @@ export const ChatQuView: React.FC<ChatQuViewProps> = ({
     setChats(prev =>
       prev.map(c => (c.id === activeRoom.id ? updatedActiveRoom : c))
     );
+
+    // Broadcast Real-time ke Cloud jika chat komunitas
+    RealtimeSyncService.sendChatMessage({
+      id: newMessage.id,
+      senderId: currentUser?.id || 'warga-me',
+      senderName: currentUser?.name || 'Warga RT 03',
+      text: inputText.trim(),
+      timestamp: new Date().toISOString()
+    });
 
     setInputText('');
 

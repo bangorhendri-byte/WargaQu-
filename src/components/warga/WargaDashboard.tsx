@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Bell,
   Headphones,
@@ -64,6 +64,7 @@ interface WargaDashboardProps {
   onOpenSecurityModal?: () => void;
   onOpenLoginModal?: () => void;
   onOpenUpdateModal?: () => void;
+  onOpenMasterAdmin?: () => void;
 }
 
 export const WargaDashboard: React.FC<WargaDashboardProps> = ({
@@ -83,11 +84,34 @@ export const WargaDashboard: React.FC<WargaDashboardProps> = ({
   onOpenSecurityModal,
   onOpenLoginModal,
   onOpenUpdateModal,
+  onOpenMasterAdmin,
 }) => {
   const [isBalanceHidden, setIsBalanceHidden] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showLogoModal, setShowLogoModal] = useState<boolean>(false);
   const [copiedPhilosophy, setCopiedPhilosophy] = useState<boolean>(false);
+  const [logoTapCount, setLogoTapCount] = useState<number>(0);
+  const lastTapTimeRef = useRef<number>(0);
+
+  const handleLogoClick = () => {
+    const now = Date.now();
+    if (now - lastTapTimeRef.current < 800) {
+      const newCount = logoTapCount + 1;
+      setLogoTapCount(newCount);
+      if (newCount >= 5) {
+        setLogoTapCount(0);
+        if (onOpenMasterAdmin) {
+          showToast('Membuka WargaQu Master HQ & Monetisasi...');
+          onOpenMasterAdmin();
+          return;
+        }
+      }
+    } else {
+      setLogoTapCount(1);
+    }
+    lastTapTimeRef.current = now;
+    setShowLogoModal(true);
+  };
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -107,9 +131,9 @@ export const WargaDashboard: React.FC<WargaDashboardProps> = ({
         <div className="flex justify-between items-center mb-3">
           {/* Logo / Title with Connected Smart Neighborhood 3D Icon */}
           <div
-            onClick={() => setShowLogoModal(true)}
+            onClick={handleLogoClick}
             className="flex items-center gap-2 cursor-pointer group active:scale-95 transition"
-            title="Lihat Konsep & Filosofi Logo WargaQu"
+            title="Lihat Konsep & Filosofi Logo WargaQu (Ketuk 5x Cepat untuk Master HQ)"
           >
             <div className="relative shrink-0">
               <img
@@ -201,10 +225,16 @@ export const WargaDashboard: React.FC<WargaDashboardProps> = ({
             <div className="flex items-center gap-1.5">
               <p className="text-xs text-emerald-200 tracking-wider uppercase font-medium">Halo,</p>
               {(currentUser?.isGenesisOwner || currentUser?.email?.toLowerCase() === 'bangorhendri@gmail.com') ? (
-                <span className="text-[9px] bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs uppercase tracking-wider">
+                <button
+                  type="button"
+                  onClick={onOpenMasterAdmin}
+                  className="text-[9px] bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs uppercase tracking-wider active:scale-95 transition"
+                  title="Buka WargaQu Master HQ & Pengaturan Monetisasi Modular"
+                >
                   <Crown className="w-2.5 h-2.5" />
-                  <span>Genesis Creator &amp; Hak Cipta Sah</span>
-                </span>
+                  <span>Genesis HQ</span>
+                  <Sparkles className="w-2.5 h-2.5 text-amber-950" />
+                </button>
               ) : (
                 <span className="text-[9px] bg-emerald-950/60 text-[#5eead4] border border-emerald-300/40 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                   <ShieldCheck className="w-2.5 h-2.5" />

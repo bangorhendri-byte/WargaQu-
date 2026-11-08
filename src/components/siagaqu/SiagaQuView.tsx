@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { UserAccount } from '../../types';
 import { AuthService } from '../../services/auth';
+import { RealtimeSyncService } from '../../services/realtimeSync';
 
 interface SiagaQuViewProps {
   onBackToMain: () => void;
@@ -156,6 +157,18 @@ export const SiagaQuView: React.FC<SiagaQuViewProps> = ({
   const [newContactName, setNewContactName] = useState<string>('');
   const [newContactPhone, setNewContactPhone] = useState<string>('');
   const [newContactRole, setNewContactRole] = useState<string>('Keluarga');
+  // Berlangganan sinyal darurat realtime antar warga RT
+  useEffect(() => {
+    const unsub = RealtimeSyncService.subscribeActiveSOS((signals) => {
+      if (signals.length > 0) {
+        const latest = signals[0];
+        if (latest.userId !== currentUser?.id) {
+          showNotification(`🚨 ALARM SOS WARGA RT: ${latest.userName} butuh bantuan (${latest.type})!`);
+        }
+      }
+    });
+    return () => unsub();
+  }, [currentUser]);
 
   // Emergency History Logs (clean, no mock data)
   const [logs, setLogs] = useState<EmergencyLog[]>(() => {
@@ -526,6 +539,17 @@ export const SiagaQuView: React.FC<SiagaQuViewProps> = ({
       transcript,
     };
     setActiveEmergencyData(newLog);
+
+    // Broadcast Real-time SOS ke seluruh warga via Cloud
+    RealtimeSyncService.broadcastSOS({
+      id: newLog.id,
+      userId: currentUser?.id || 'warga-rt03',
+      userName: currentUser?.name || 'Warga RT 03',
+      type: selectedCategory,
+      status: 'active',
+      address: 'RT 03 / RW 05 - Blok A No. 12',
+      timestamp: new Date().toISOString()
+    });
 
     let sec = 5;
     let stepCount = 1;

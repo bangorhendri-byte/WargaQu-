@@ -37,6 +37,7 @@ interface SettingViewProps {
   onSaveMenu: (menu: MenuItem[]) => void;
   onBackToWarga?: () => void;
   onOpenUpdateModal?: () => void;
+  onOpenMasterAdmin?: () => void;
 }
 
 export const SettingView: React.FC<SettingViewProps> = ({
@@ -48,6 +49,7 @@ export const SettingView: React.FC<SettingViewProps> = ({
   onSaveMenu,
   onBackToWarga,
   onOpenUpdateModal,
+  onOpenMasterAdmin,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'toko' | 'menu' | 'printer' | 'update'>('toko');
   const [versionInfo] = useState<AppVersionInfo>(UpdateService.getVersionInfo());
@@ -541,6 +543,34 @@ export const SettingView: React.FC<SettingViewProps> = ({
       {/* TAB 4: PUSAT PEMBARUAN & DATA AMAN (AUTO-UPDATE) */}
       {activeSubTab === 'update' && (
         <div className="space-y-3 animate-in fade-in">
+          {/* Owner Only: Master Admin HQ & Monetisasi */}
+          {onOpenMasterAdmin && (
+            <div className="p-4 rounded-3xl bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 text-white shadow-md border border-amber-500/40 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black text-amber-300">WargaQu Master HQ</span>
+                    <span className="text-[9px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.2 rounded">Owner Gate</span>
+                  </div>
+                  <p className="text-[11px] text-stone-300 mt-0.5">
+                    Kontrol saklar fee modular, saldo terakumulasi, &amp; QRIS owner
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenMasterAdmin}
+                className="px-3 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black text-xs rounded-xl shadow-xs active:scale-95 transition flex items-center gap-1 shrink-0"
+              >
+                <span>Buka HQ</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {/* Card Status Versi */}
           <div className="p-4 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-3">
             <div className="flex items-start justify-between">
