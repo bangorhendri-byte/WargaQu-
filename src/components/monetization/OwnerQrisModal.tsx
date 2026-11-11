@@ -82,7 +82,6 @@ export const OwnerQrisModal: React.FC<OwnerQrisModalProps> = ({
   };
 
   const handleConfirmPayment = async () => {
-    if (currentDue <= 0) return;
     setIsSubmitting(true);
     try {
       const submission = await MonetizationService.createPaymentSubmission({
@@ -95,6 +94,10 @@ export const OwnerQrisModal: React.FC<OwnerQrisModalProps> = ({
         proofImageUrl: proofImage,
         reason
       });
+
+      // Permintaan Owner: Kasir langsung kembali normal tanpa menunggu karena pengecekan mutasi dilakukan berkala
+      await MonetizationService.markFeeSettled(currentDue, `Setoran Diajukan (${submission.id})`);
+      setLedger(MonetizationService.getLedger());
 
       setSubmittedTicket(submission);
       if (onSettledSuccess) onSettledSuccess();

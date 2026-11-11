@@ -484,10 +484,10 @@ export const WargaDashboard: React.FC<WargaDashboardProps> = ({
                 </span>
               )}
               <span className="text-[11px] font-bold text-emerald-900 mt-1.5 text-center leading-tight flex items-center gap-0.5">
-                UsahaQu
+                BaksoQu
               </span>
               <span className="text-[9px] text-emerald-600 font-semibold leading-none">
-                Bakso Qu
+                POS Resto
               </span>
             </button>
 
@@ -501,7 +501,7 @@ export const WargaDashboard: React.FC<WargaDashboardProps> = ({
                 <Store className="w-6 h-6 text-emerald-700" />
               </div>
               <span className="absolute -top-1.5 -right-1 bg-teal-600 text-white text-[8px] font-black px-1.5 py-0.2 rounded-full shadow-xs uppercase tracking-tight">
-                MODULAR
+                VOICE AI
               </span>
               <span className="text-[11px] font-bold text-emerald-900 mt-1.5 text-center leading-tight flex items-center gap-0.5">
                 ModularQu
@@ -624,14 +624,14 @@ export const WargaDashboard: React.FC<WargaDashboardProps> = ({
                   </span>
                 </div>
                 <h4 className="text-xs font-bold text-white group-hover:text-emerald-300 transition">
-                  Bakso Qu Resto
+                  UsahaQu (BaksoQu)
                 </h4>
                 <p className="text-[10px] text-emerald-200/80 leading-tight mt-0.5">
-                  POS Dine-in, denah meja & dapur
+                  POS Dine-in, denah meja &amp; dapur
                 </p>
               </div>
               <div className="mt-2 text-[10px] font-bold text-emerald-300 flex items-center gap-1">
-                <span>Buka Resto</span>
+                <span>Buka BaksoQu</span>
                 <ChevronRight className="w-3 h-3" />
               </div>
             </button>
@@ -651,14 +651,14 @@ export const WargaDashboard: React.FC<WargaDashboardProps> = ({
                   </span>
                 </div>
                 <h4 className="text-xs font-bold text-white group-hover:text-teal-300 transition">
-                  POS ModularQu
+                  UsahaQu (ModularQu)
                 </h4>
                 <p className="text-[10px] text-emerald-200/80 leading-tight mt-0.5">
-                  Voice Kasir, 4 format struk & omset
+                  Voice Kasir, Multi-Usaha &amp; Omset
                 </p>
               </div>
               <div className="mt-2 text-[10px] font-bold text-teal-300 flex items-center gap-1">
-                <span>Buka Modular</span>
+                <span>Buka ModularQu</span>
                 <ChevronRight className="w-3 h-3" />
               </div>
             </button>

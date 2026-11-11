@@ -127,28 +127,28 @@ export const SiagaQuView: React.FC<SiagaQuViewProps> = ({
   const [beaconColor, setBeaconColor] = useState<string | null>(null);
   const beaconAbortRef = useRef<boolean>(false);
 
-  // Contacts
+  // Contacts SiagaQu: Khusus Keluarga, Pasangan, Anak, Istri, Saudara yang dipilih
   const [contacts, setContacts] = useState<EmergencyContact[]>([
     {
       id: 'c-1',
-      name: 'Pak RT Bambang (Ketua RT 03)',
-      phone: '0812-3456-7890',
-      role: 'Pengurus Utama',
-      priority: 'Prioritas',
+      name: 'Pasangan (Istri / Suami)',
+      phone: '0813-9988-7766',
+      role: 'Pasangan',
+      priority: 'Darurat',
     },
     {
       id: 'c-2',
-      name: 'Istri / Keluarga Rumah',
-      phone: '0813-9988-7766',
-      role: 'Kontak Kerabat',
+      name: 'Anak',
+      phone: '0812-3456-7890',
+      role: 'Anak',
       priority: 'Darurat',
     },
     {
       id: 'c-3',
-      name: 'Bpk. Dedi (Koordinator Siskamling)',
+      name: 'Saudara Kandung / Kerabat Pilihan',
       phone: '0819-7788-9900',
-      role: 'Keamanan Lingkungan',
-      priority: 'Aktif',
+      role: 'Saudara Pilihan',
+      priority: 'Prioritas',
     },
   ]);
 
@@ -891,29 +891,29 @@ export const SiagaQuView: React.FC<SiagaQuViewProps> = ({
               </div>
 
               <p className="text-[11px] text-slate-400 text-center mt-3 max-w-xs">
-                Sinyal radio otomatis membunyikan alarm warga radius{' '}
-                <strong className="text-white">500m - 1km</strong> + pengurus RT domisili.
+                Sinyal darurat keluarga otomatis menghubungi lingkaran prioritas:{' '}
+                <strong className="text-white">Pasangan, Anak, Istri, &amp; Saudara</strong> yang dipilih.
               </p>
             </div>
 
             {/* CARDS INFORMASI SIAGA QUICK TARGET */}
             <div className="bg-slate-800/60 rounded-2xl p-3.5 border border-slate-700/60 space-y-2">
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex justify-between">
-                <span>Target Broadcast Otomatis</span>
-                <span className="text-emerald-400">3 Kontak Aktif</span>
+                <span>Lingkaran Keluarga Prioritas</span>
+                <span className="text-emerald-400">{contacts.length} Kontak Terpilih</span>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
                 <div className="p-2 bg-slate-900/80 rounded-xl border border-slate-700">
-                  <div className="text-white font-bold">Pengurus RT 03</div>
-                  <div className="text-emerald-400 font-medium">Auto Acc</div>
+                  <div className="text-white font-bold">Pasangan</div>
+                  <div className="text-red-400 font-medium">Darurat Utama</div>
                 </div>
                 <div className="p-2 bg-slate-900/80 rounded-xl border border-slate-700">
-                  <div className="text-white font-bold">Siskamling</div>
-                  <div className="text-emerald-400 font-medium">Sirine On</div>
+                  <div className="text-white font-bold">Anak</div>
+                  <div className="text-emerald-400 font-medium">Auto SOS</div>
                 </div>
                 <div className="p-2 bg-slate-900/80 rounded-xl border border-slate-700">
-                  <div className="text-white font-bold">Keluarga Utama</div>
-                  <div className="text-emerald-400 font-medium">SMS + Call</div>
+                  <div className="text-white font-bold">Saudara</div>
+                  <div className="text-emerald-400 font-medium">Sinyal Siaga</div>
                 </div>
               </div>
             </div>
@@ -1298,7 +1298,7 @@ export const SiagaQuView: React.FC<SiagaQuViewProps> = ({
           <div className="space-y-4">
             <div className="flex justify-between items-center px-1">
               <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Kontak Ring 1 (Keluarga & RT)
+                Lingkaran Darurat Keluarga (Pasangan, Anak &amp; Saudara Pilihan)
               </h3>
               <button
                 onClick={() => setIsAddContactModalOpen(true)}
@@ -1678,7 +1678,7 @@ export const SiagaQuView: React.FC<SiagaQuViewProps> = ({
                 <label className="block text-slate-400 font-bold mb-1">Nama Kontak</label>
                 <input
                   type="text"
-                  placeholder="Contoh: Pak RT Agus / Kakak Kandung"
+                  placeholder="Contoh: Istri / Suami / Anak Pertama / Adik Kandung"
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:ring-2 focus:ring-red-500 outline-hidden"
@@ -1699,16 +1699,17 @@ export const SiagaQuView: React.FC<SiagaQuViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-slate-400 font-bold mb-1">Peran / Hubungan</label>
+                <label className="block text-slate-400 font-bold mb-1">Peran / Hubungan Keluarga</label>
                 <select
                   value={newContactRole}
                   onChange={(e) => setNewContactRole(e.target.value)}
                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:ring-2 focus:ring-red-500 outline-hidden"
                 >
-                  <option>Keluarga</option>
-                  <option>Pengurus RT/RW</option>
-                  <option>Tetangga Terdekat</option>
-                  <option>Dokter / Nakes</option>
+                  <option value="Pasangan">Pasangan (Istri / Suami)</option>
+                  <option value="Anak">Anak Kandung</option>
+                  <option value="Saudara">Saudara Kandung / Kakak-Adik</option>
+                  <option value="Orang Tua">Orang Tua (Ayah / Ibu)</option>
+                  <option value="Kerabat Pilihan">Kerabat / Keluarga Dekat Pilihan</option>
                 </select>
               </div>
 

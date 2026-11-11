@@ -370,7 +370,7 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
   const [showAddSingleModal, setShowAddSingleModal] = useState<boolean>(false);
   const [showAyahUyutModal, setShowAyahUyutModal] = useState<boolean>(false);
   const [showClaimModal, setShowClaimModal] = useState<boolean>(false);
-  const [showSettingsDrawer, setShowSettingsDrawer] = useState<boolean>(false);
+  const [showLeftSidebar, setShowLeftSidebar] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
 
   // Batch Input Form (Dukungan Entry Awal Default / Bebas)
@@ -2426,15 +2426,15 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
             <span className="hidden lg:inline">Cetak / PDF</span>
           </button>
 
-          {/* Settings Drawer Toggle */}
+          {/* Left Sidebar Toggle */}
           <button
-            onClick={() => setShowSettingsDrawer((prev) => !prev)}
+            onClick={() => setShowLeftSidebar((prev) => !prev)}
             className={`p-1.5 rounded-lg border transition ${
-              showSettingsDrawer
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+              showLeftSidebar
+                ? 'bg-emerald-600 border-emerald-500 text-white ring-2 ring-emerald-400/40'
+                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
             }`}
-            title="Panel Pengaturan"
+            title="Opsi & Fitur Kanvas (Sidebar Kiri)"
           >
             <Sliders className="w-4 h-4" />
           </button>
@@ -2450,264 +2450,7 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
         </div>
       </header>
 
-      {/* ----------------------------------------------------------------- */}
-      {/* SECONDARY TOOLBAR: COMPACT HORIZONTAL SCROLLABLE CHIPS (MOBILE FRIENDLY) */}
-      {/* ----------------------------------------------------------------- */}
-      <div className="bg-slate-900/95 backdrop-blur border-b border-slate-800 px-2.5 py-1.5 flex items-center gap-2 text-xs z-20 overflow-x-auto no-scrollbar whitespace-nowrap">
-        {/* Tombol Rapikan Otomatis (Dynamic Tree Spacing & Auto Centering) */}
-        <button
-          onClick={handleAutoLayoutTree}
-          className="shrink-0 px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition border border-emerald-500/40"
-          title="Rapikan Otomatis: Susun ulang posisi node dengan kalkulasi lebar sub-tree & auto-centering bebas bentrok"
-        >
-          <LayoutGrid className="w-3.5 h-3.5 text-emerald-200" />
-          <span>Rapikan Otomatis</span>
-        </button>
-
-        {/* Connector Line Selector Chips */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
-          <span className="text-[11px] text-slate-400 px-1 font-medium flex items-center gap-1">
-            <GitBranch className="w-3 h-3 text-indigo-400" />
-            <span>Garis:</span>
-          </span>
-          <button
-            onClick={() => {
-              setConnectorType('orthogonal');
-              showNotification('Garis Siku Paralel (Collision-Free Corridor) Aktif');
-            }}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              connectorType === 'orthogonal'
-                ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Paralel Siku Bebas Nabrak (Collision-Free Corridor)"
-          >
-            <span>Siku</span>
-          </button>
-          <button
-            onClick={() => {
-              setConnectorType('bezier');
-              showNotification('Garis Lengkung Bezier Aktif');
-            }}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              connectorType === 'bezier'
-                ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Lengkung Bezier"
-          >
-            <span>Bezier</span>
-          </button>
-          <button
-            onClick={() => {
-              setConnectorType('linear');
-              showNotification('Garis Seri Lurus Aktif');
-            }}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              connectorType === 'linear'
-                ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Seri Lurus Langsung"
-          >
-            <Minus className="w-2.5 h-2.5" />
-            <span>Lurus</span>
-          </button>
-        </div>
-
-        {/* Node Shape Selector Chips */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
-          <span className="text-[11px] text-slate-400 px-1 font-medium">Bentuk:</span>
-          <button
-            onClick={() => setNodeShape('card')}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              nodeShape === 'card'
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Square className="w-3 h-3" />
-            <span>Kotak</span>
-          </button>
-          <button
-            onClick={() => setNodeShape('circle')}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              nodeShape === 'circle'
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Circle className="w-3 h-3" />
-            <span>Bulat</span>
-          </button>
-          <button
-            onClick={() => setNodeShape('hexagon')}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              nodeShape === 'hexagon'
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Hexagon className="w-3 h-3" />
-            <span>Hexa</span>
-          </button>
-        </div>
-
-        {/* Multi-Skin Selector Chips */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
-          <span className="text-[11px] text-slate-400 px-1 font-medium">Skin:</span>
-          <button
-            onClick={() => {
-              setDisplaySkin('simple');
-              showNotification('Skin Simple aktif: Hanya muncul Nama Saja');
-            }}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              displaySkin === 'simple'
-                ? 'bg-amber-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Skin Simple: Hanya Muncul Nama Saja"
-          >
-            <span>Simple</span>
-          </button>
-          <button
-            onClick={() => {
-              setDisplaySkin('pill');
-              showNotification('Skin Kapsul aktif: Format horizontal ramping');
-            }}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              displaySkin === 'pill'
-                ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Skin Kapsul: Nama Saja Format Kapsul Ramping"
-          >
-            <span>Kapsul</span>
-          </button>
-          <button
-            onClick={() => {
-              setDisplaySkin('detailed');
-              showNotification('Skin Lengkap aktif: 5 Atribut Presisi');
-            }}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition flex items-center gap-1 ${
-              displaySkin === 'detailed'
-                ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Skin Lengkap: 5 Atribut Presisi"
-          >
-            <span>Lengkap</span>
-          </button>
-        </div>
-
-        {/* Tombol Auto-Max / Pas Kertas */}
-        <button
-          onClick={() => handleAutoMaximizeToPaper(paperSize === 'autofit' ? 'A4' : paperSize, orientation)}
-          className="shrink-0 px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition border border-cyan-400/40"
-          title="⚡ Auto-Max Kertas: Maksimalkan ukuran kartu, seimbangkan ruang kosong (atas, bawah, kanan, kiri), dan pastikan SEMUA nama masuk ke lembar cetak"
-        >
-          <Maximize2 className="w-3.5 h-3.5 text-cyan-200" />
-          <span>⚡ Pas Kertas ({paperSize})</span>
-        </button>
-
-        {/* Paper Size Preset Dropdown */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
-          <span className="text-[11px] text-slate-400 px-1 font-medium">Kertas:</span>
-          <select
-            value={paperSize}
-            onChange={(e) => {
-              const newSize = e.target.value as PaperSize;
-              setPaperSize(newSize);
-              if (newSize !== 'autofit') {
-                handleAutoMaximizeToPaper(newSize, orientation);
-              }
-            }}
-            className="bg-slate-900 text-slate-200 border border-slate-700 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:border-cyan-500 font-medium"
-          >
-            <option value="autofit">Auto-Fit</option>
-            <option value="A0">A0 (Poster Besar)</option>
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="A3">A3</option>
-            <option value="A4">A4 (Standar)</option>
-            <option value="F4">F4 (Folio 215×330)</option>
-          </select>
-          {paperSize !== 'autofit' && (
-            <button
-              onClick={() => {
-                const newOr = orientation === 'landscape' ? 'portrait' : 'landscape';
-                setOrientation(newOr);
-                handleAutoMaximizeToPaper(paperSize, newOr);
-              }}
-              className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-[10px] font-bold border border-slate-700 transition"
-              title="Ganti Orientasi Kertas (Landscape / Portrait)"
-            >
-              {orientation === 'landscape' ? '↔ L' : '↕ P'}
-            </button>
-          )}
-        </div>
-
-        {/* Stepper Ukuran Kartu (Membesar / Mengecil) */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
-          <span className="text-[11px] text-slate-400 px-1 font-medium">Ukuran:</span>
-          <button
-            onClick={() => handleCardScaleStep('down')}
-            className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center active:scale-95 transition"
-            title="Kecilkan Kartu (-10%)"
-          >
-            -
-          </button>
-          <span className="text-[11px] font-mono text-cyan-300 w-11 text-center font-bold">
-            {Math.round(cardScale * 100)}%
-          </span>
-          <button
-            onClick={() => handleCardScaleStep('up')}
-            className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center active:scale-95 transition"
-            title="Besarkan Kartu (+10%)"
-          >
-            +
-          </button>
-        </div>
-
-        {/* Koreksi & Urutkan Silsilah per Thn Lahir */}
-        <button
-          onClick={handleSortAllTreeByBirthYear}
-          className="shrink-0 px-2 py-1 rounded-lg bg-amber-600/90 hover:bg-amber-500 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition active:scale-95 border border-amber-500/40"
-          title="Solusi Salah Urutan: Urutkan otomatis seluruh generasi (Kakek, Ayah, Anak) berdasarkan Tahun Lahir (Tua ke Muda)"
-        >
-          <Zap className="w-3.5 h-3.5 text-amber-200" />
-          <span>⚡ Urut Thn Lahir</span>
-        </button>
-
-        {/* Canvas Zoom Controls */}
-        <div className="flex items-center gap-1 shrink-0 ml-auto">
-          <button
-            onClick={() => setZoom((z) => Math.max(0.3, z - 0.15))}
-            className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200"
-            title="Perkecil Kanvas"
-          >
-            <ZoomOut className="w-3.5 h-3.5" />
-          </button>
-          <span className="text-[11px] font-mono text-slate-300 w-10 text-center">
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            onClick={() => setZoom((z) => Math.min(2.5, z + 0.15))}
-            className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200"
-            title="Perbesar Kanvas"
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={handleAutoFit}
-            className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200"
-            title="Reset Posisi (Auto-Fit)"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
+      
       {/* ----------------------------------------------------------------- */}
       {/* CLAIMED ACCOUNT BANNER (IF ACTIVE) */}
       {/* ----------------------------------------------------------------- */}
@@ -2767,6 +2510,51 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
           setZoom((z) => Math.min(2.5, Math.max(0.25, z * zoomFactor)));
         }}
       >
+        {/* FLOATING TOGGLE BUTTON UNTUK HIDDEN SIDEBAR KIRI */}
+        <div className="absolute top-3 left-3 z-30 flex items-center gap-2">
+          <button
+            onClick={() => setShowLeftSidebar((prev) => !prev)}
+            className={`px-3 py-2 rounded-xl backdrop-blur-md font-bold text-xs flex items-center gap-2 shadow-2xl active:scale-95 transition border ${
+              showLeftSidebar
+                ? 'bg-emerald-600 border-emerald-400 text-white shadow-emerald-900/40 ring-2 ring-emerald-400/30'
+                : 'bg-slate-900/90 border-slate-700/80 text-slate-200 hover:bg-slate-800 hover:text-white'
+            }`}
+            title="Buka / Sembunyikan Opsi & Fitur Kanvas (Sidebar Kiri)"
+          >
+            <Sliders className="w-4 h-4 text-emerald-400" />
+            <span>Opsi Kanvas</span>
+            <ChevronRight className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showLeftSidebar ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {/* FLOATING COMPACT ZOOM CONTROLS (TOP RIGHT) */}
+        <div className="absolute top-3 right-3 z-30 flex items-center gap-1 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 p-1 rounded-xl shadow-xl">
+          <button
+            onClick={() => setZoom((z) => Math.max(0.3, z - 0.15))}
+            className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 transition"
+            title="Perkecil Kanvas"
+          >
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+          <span className="text-[11px] font-mono text-slate-300 w-10 text-center font-bold">
+            {Math.round(zoom * 100)}%
+          </span>
+          <button
+            onClick={() => setZoom((z) => Math.min(2.5, z + 0.15))}
+            className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 transition"
+            title="Perbesar Kanvas"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleAutoFit}
+            className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 transition"
+            title="Reset Posisi (Auto-Fit)"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         <svg
           ref={svgRef}
           id="leluhurqu-svg-canvas"
@@ -2990,69 +2778,160 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
       </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* SIDEBAR: PENGATURAN BENTUK, GARIS, EKSPOR */}
+      {/* HIDDEN LEFT SIDEBAR: SEMUA OPSI, FITUR, DAN SUB-MENU LELUHURQU */}
       {/* ----------------------------------------------------------------- */}
-      {showSettingsDrawer && (
-        <aside className="absolute top-12 right-0 bottom-0 w-80 sm:w-96 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 p-4 overflow-y-auto z-40 shadow-2xl flex flex-col gap-4 animate-in slide-in-from-right duration-200">
+      {showLeftSidebar && (
+        <aside className="absolute top-12 left-0 bottom-0 w-80 sm:w-96 bg-slate-900/98 backdrop-blur-xl border-r border-slate-800 p-4 overflow-y-auto z-40 shadow-2xl flex flex-col gap-4 animate-in slide-in-from-left duration-200">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-emerald-400" />
-              <h3 className="font-bold text-white text-base">Panel Pengaturan</h3>
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+                <Sliders className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-base">Opsi &amp; Fitur Kanvas</h3>
+                <p className="text-[11px] text-slate-400">Pengaturan silsilah, tata letak &amp; cetak</p>
+              </div>
             </div>
             <button
-              onClick={() => setShowSettingsDrawer(false)}
-              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+              onClick={() => setShowLeftSidebar(false)}
+              className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition"
+              title="Tutup Sidebar Kiri"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Section: Solusi Ayah Uyut */}
-          <div className="space-y-2 p-3 bg-amber-950/30 rounded-xl border border-amber-600/40">
-            <div className="flex items-center gap-1.5 text-amber-300 font-bold text-xs uppercase">
-              <Crown className="w-4 h-4 text-amber-400" />
-              <span>Solusi Ayah Uyut Baru Ditemukan</span>
-            </div>
-            <p className="text-[11px] text-amber-200/80 leading-relaxed">
-              Jika leluhur puncak yang lebih tua ditemukan di atas generasi saat ini, sisipkan langsung di sini tanpa merusak posisi anak-cucunya.
-            </p>
-            <button
-              onClick={() => {
-                setShowAyahUyutModal(true);
-                setShowSettingsDrawer(false);
-              }}
-              className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow"
-            >
-              <Crown className="w-3.5 h-3.5" />
-              <span>Sisipkan Ayah Uyut di Puncak</span>
-            </button>
-          </div>
-
-          {/* Section: Klaim Akun */}
-          <div className="space-y-2 p-3 bg-slate-800/60 rounded-xl border border-slate-700">
-            <div className="flex items-center gap-1.5 text-slate-200 font-bold text-xs uppercase">
-              <Star className="w-4 h-4 text-amber-400" />
-              <span>Klaim Urutan Silsilah by Akun</span>
+          {/* Section 1: Tata Letak & Urutan */}
+          <div className="space-y-2.5 p-3 bg-slate-800/60 rounded-xl border border-slate-700">
+            <div className="flex items-center gap-1.5 text-emerald-300 font-bold text-xs uppercase">
+              <LayoutGrid className="w-4 h-4 text-emerald-400" />
+              <span>Tata Letak &amp; Urutan</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Tandai posisi Anda sendiri di bagan untuk menyorot jalur nasab langsung dari leluhur utama ke akun Anda.
+              Otomatis susun posisi simpul pohon atau koreksi urutan silsilah berdasarkan tahun lahir.
             </p>
-            <button
-              onClick={() => {
-                setShowClaimModal(true);
-                setShowSettingsDrawer(false);
-              }}
-              className="w-full py-2 px-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5"
-            >
-              <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{claimedNodeId ? 'Kelola / Ganti Klaim Akun' : 'Klaim Posisi Akun Saya'}</span>
-            </button>
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={() => {
+                  handleAutoLayoutTree();
+                  showNotification('Pohon dirapikan otomatis bebas bentrok.');
+                }}
+                className="w-full py-2 px-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-2 shadow-sm active:scale-95 transition border border-emerald-500/40"
+                title="Rapikan Otomatis: Susun ulang posisi node dengan kalkulasi lebar sub-tree & auto-centering bebas bentrok"
+              >
+                <LayoutGrid className="w-3.5 h-3.5 text-emerald-200" />
+                <span>Rapikan Otomatis (Auto-Layout)</span>
+              </button>
+
+              <button
+                onClick={handleSortAllTreeByBirthYear}
+                className="w-full py-2 px-3 bg-amber-600/90 hover:bg-amber-500 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 shadow-sm transition active:scale-95 border border-amber-500/40"
+                title="Solusi Salah Urutan: Urutkan otomatis seluruh generasi berdasarkan Tahun Lahir (Tua ke Muda)"
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-200" />
+                <span>⚡ Urut Thn Lahir (Tua ke Muda)</span>
+              </button>
+            </div>
           </div>
 
-          {/* Section: Pilihan Multi Skin Tampilan */}
+          {/* Section 2: Bentuk Simpul & Garis Penghubung */}
+          <div className="space-y-3 p-3 bg-slate-800/60 rounded-xl border border-slate-700">
+            <div className="flex items-center gap-1.5 text-indigo-300 font-bold text-xs uppercase">
+              <GitBranch className="w-4 h-4 text-indigo-400" />
+              <span>Garis &amp; Bentuk Simpul</span>
+            </div>
+
+            {/* Garis Konektor */}
+            <div>
+              <label className="text-[10px] text-slate-400 font-medium block mb-1.5">Model Garis Konektor:</label>
+              <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                <button
+                  onClick={() => {
+                    setConnectorType('orthogonal');
+                    showNotification('Garis Siku Paralel Aktif');
+                  }}
+                  className={`py-1 rounded text-xs font-medium transition text-center ${
+                    connectorType === 'orthogonal'
+                      ? 'bg-indigo-600 text-white font-bold shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Siku
+                </button>
+                <button
+                  onClick={() => {
+                    setConnectorType('bezier');
+                    showNotification('Garis Lengkung Bezier Aktif');
+                  }}
+                  className={`py-1 rounded text-xs font-medium transition text-center ${
+                    connectorType === 'bezier'
+                      ? 'bg-indigo-600 text-white font-bold shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Bezier
+                </button>
+                <button
+                  onClick={() => {
+                    setConnectorType('linear');
+                    showNotification('Garis Seri Lurus Aktif');
+                  }}
+                  className={`py-1 rounded text-xs font-medium transition text-center ${
+                    connectorType === 'linear'
+                      ? 'bg-indigo-600 text-white font-bold shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Lurus
+                </button>
+              </div>
+            </div>
+
+            {/* Bentuk Node */}
+            <div>
+              <label className="text-[10px] text-slate-400 font-medium block mb-1.5">Bentuk Simpul (Node):</label>
+              <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                <button
+                  onClick={() => setNodeShape('card')}
+                  className={`py-1 px-2 rounded text-xs font-medium transition flex items-center justify-center gap-1 ${
+                    nodeShape === 'card'
+                      ? 'bg-emerald-600 text-white font-bold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Square className="w-3 h-3" />
+                  <span>Kotak</span>
+                </button>
+                <button
+                  onClick={() => setNodeShape('circle')}
+                  className={`py-1 px-2 rounded text-xs font-medium transition flex items-center justify-center gap-1 ${
+                    nodeShape === 'circle'
+                      ? 'bg-emerald-600 text-white font-bold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Circle className="w-3 h-3" />
+                  <span>Bulat</span>
+                </button>
+                <button
+                  onClick={() => setNodeShape('hexagon')}
+                  className={`py-1 px-2 rounded text-xs font-medium transition flex items-center justify-center gap-1 ${
+                    nodeShape === 'hexagon'
+                      ? 'bg-emerald-600 text-white font-bold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Hexagon className="w-3 h-3" />
+                  <span>Hexa</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Multi-Skin Tampilan */}
           <div className="space-y-2 p-3 bg-slate-800/60 rounded-xl border border-slate-700">
-            <div className="flex items-center gap-1.5 text-slate-200 font-bold text-xs uppercase">
-              <Layers className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-1.5 text-amber-300 font-bold text-xs uppercase">
+              <Layers className="w-4 h-4 text-amber-400" />
               <span>Multi Skin Tampilan Bagan</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
@@ -3119,7 +2998,7 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
             </div>
           </div>
 
-          {/* Section: Ukuran Kertas & Maksimalkan Tampilan (Auto-Max) */}
+          {/* Section 4: Ukuran Kertas & Auto-Max */}
           <div className="space-y-3 p-3 bg-gradient-to-br from-slate-900 to-cyan-950/40 rounded-xl border border-cyan-500/40">
             <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs uppercase">
               <Maximize2 className="w-4 h-4 text-cyan-400" />
@@ -3142,7 +3021,7 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
                       handleAutoMaximizeToPaper(newSize, orientation);
                     }
                   }}
-                  className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5 focus:border-cyan-500"
+                  className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5 focus:border-cyan-500 font-medium"
                 >
                   <option value="autofit">Auto-Fit Bebas</option>
                   <option value="A0">A0 (Poster Raksasa)</option>
@@ -3169,7 +3048,7 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
                         : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                     }`}
                   >
-                    ↔ Mendatar
+                    ↔ L
                   </button>
                   <button
                     type="button"
@@ -3183,18 +3062,16 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
                         : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                     }`}
                   >
-                    ↕ Tegak
+                    ↕ P
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Slider Skala Kartu (Membesar / Mengecil) */}
+            {/* Slider Skala Kartu */}
             <div className="space-y-1.5 pt-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-300 font-medium flex items-center gap-1">
-                  <span>Ukuran Kartu (Membesar/Mengecil):</span>
-                </span>
+                <span className="text-slate-300 font-medium">Ukuran Kartu:</span>
                 <span className="font-mono font-bold text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
                   {Math.round(cardScale * 100)}%
                 </span>
@@ -3253,7 +3130,7 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
                   }}
                   className="rounded border-slate-700 text-cyan-600 focus:ring-cyan-500"
                 />
-                <span>Regangkan jarak antar kartu jika kertas masih longgar</span>
+                <span>Regangkan jarak antar kartu jika kertas longgar</span>
               </label>
             </div>
 
@@ -3263,12 +3140,69 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
               onClick={() => handleAutoMaximizeToPaper(paperSize === 'autofit' ? 'A4' : paperSize, orientation)}
               className="w-full py-2.5 px-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95 border border-cyan-400/40"
             >
-              <Maximize2 className="w-4 h-4 text-cyan-200" />
-              <span>⚡ Eksekusi Pas Kertas (Auto-Max)</span>
+              <Maximize2 className="w-3.5 h-3.5 text-cyan-200" />
+              <span>⚡ Pas Kertas ({paperSize})</span>
             </button>
           </div>
 
-          {/* Section: Cetak Presisi & Ekspor */}
+          {/* Section 5: Fitur Khusus Silsilah Puncak & Akun */}
+          <div className="space-y-2 p-3 bg-amber-950/30 rounded-xl border border-amber-600/40">
+            <div className="flex items-center gap-1.5 text-amber-300 font-bold text-xs uppercase">
+              <Crown className="w-4 h-4 text-amber-400" />
+              <span>Solusi Ayah Uyut Puncak</span>
+            </div>
+            <p className="text-[11px] text-amber-200/80 leading-relaxed">
+              Jika leluhur puncak yang lebih tua ditemukan di atas generasi saat ini, sisipkan langsung di sini tanpa merusak posisi anak-cucunya.
+            </p>
+            <button
+              onClick={() => {
+                const rootIds = nodes.filter((n) => !n.parentId).map((n) => n.id);
+                setAyahUyutForm((prev) => ({
+                  ...prev,
+                  childrenIds: rootIds,
+                }));
+                setShowAyahUyutModal(true);
+                setShowLeftSidebar(false);
+              }}
+              className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow"
+            >
+              <Crown className="w-3.5 h-3.5" />
+              <span>Sisipkan Ayah Uyut di Puncak</span>
+            </button>
+          </div>
+
+          {/* Section 6: Klaim Akun & Input Massal */}
+          <div className="space-y-2 p-3 bg-slate-800/60 rounded-xl border border-slate-700">
+            <div className="flex items-center gap-1.5 text-slate-200 font-bold text-xs uppercase">
+              <Star className="w-4 h-4 text-amber-400" />
+              <span>Klaim Akun &amp; Input Masal</span>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  setShowClaimModal(true);
+                  setShowLeftSidebar(false);
+                }}
+                className="w-full py-2 px-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{claimedNodeId ? 'Kelola / Ganti Klaim Akun' : 'Klaim Posisi Akun Saya'}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setBatchParentId('');
+                  setShowBatchModal(true);
+                  setShowLeftSidebar(false);
+                }}
+                className="w-full py-2 px-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Input Massal (Bebas / Default)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Section 7: Cetak Presisi & Ekspor */}
           <div className="space-y-2 border-t border-slate-800 pt-3">
             <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
               Cetak Presisi &amp; Ekspor Gambar
@@ -3306,7 +3240,7 @@ export const GridCanvasEngine: React.FC<GridCanvasEngineProps> = ({
             </a>
           </div>
 
-          {/* Section: Hitung Ulang Penomoran */}
+          {/* Section 8: Hitung Ulang Penomoran */}
           <div className="space-y-2 border-t border-slate-800 pt-3 mt-auto">
             <button
               onClick={() => {

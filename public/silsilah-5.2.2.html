@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Silsilah Keluarga 5.2.2</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --border-color: #333;
+      --accent-color: #00e676;
+      --text-color: #e0e0e0;
+      --text-sub: #aaa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', monospace, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); display: flex; height: 100vh; overflow: hidden; }
+
+    /* Sidebar Navigation */
+    #sidebar {
+      width: 240px;
+      background: #181818;
+      border-right: 1px solid var(--border-color);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #sidebar h3 { font-size: 13px; text-transform: uppercase; color: var(--text-sub); margin-bottom: 5px; letter-spacing: 1px; }
+    .btn-trah {
+      background: #252525;
+      color: #fff;
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      text-align: left;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    .btn-trah.active, .btn-trah:hover { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
+    
+    .btn-add-trah {
+      background: transparent;
+      color: var(--accent-color);
+      border: 1px dashed var(--accent-color);
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    
+    .btn-preview-mode {
+      margin-top: auto;
+      background: #2979ff;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-preview-mode:hover { background: #2962ff; }
+
+    /* Main Container */
+    #main-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+    .header-action { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+    .tree-container { font-family: monospace; }
+
+    /* Tree Node / Card Item */
+    .tree-node {
+      margin-left: 20px;
+      position: relative;
+      padding-left: 15px;
+      border-left: 2px dashed #444;
+      margin-top: 10px;
+    }
+    .tree-node::before {
+      content: "+---> ";
+      position: absolute;
+      left: 0;
+      top: 14px;
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+    .root-node { border-left: none; margin-left: 0; padding-left: 0; margin-top: 15px; }
+    .root-node::before { content: ""; }
+
+    .card {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+    .card:hover { border-color: var(--accent-color); }
+
+    .card-photo {
+      width: 42px;
+      height: 42px;
+      background: #2a2a2a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-sub);
+      overflow: hidden;
+      border: 1px solid #444;
+    }
+    .card-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+    .card-info { display: flex; flex-direction: column; }
+    .card-name { font-weight: bold; font-size: 14px; color: #fff; }
+    .card-years { font-size: 11px; color: var(--text-sub); }
+
+    .card-actions { margin-left: 10px; display: flex; gap: 5px; }
+    .btn-action {
+      background: #2a2a2a;
+      color: var(--accent-color);
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .btn-action:hover { background: var(--accent-color); color: #000; }
+    .btn-delete { color: #ff5252; border-color: #522; }
+    .btn-delete:hover { background: #ff5252; color: #fff; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      width: 340px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .modal-content h4 { color: var(--accent-color); margin-bottom: 5px; }
+    .modal-content input {
+      background: #121212;
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      color: #fff;
+      border-radius: 5px;
+    }
+    .modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+
+    /* PRINT STYLES */
+    @media print {
+      #sidebar, .card-actions, .btn-add-trah, .header-action button { display: none !important; }
+      body { background: #fff; color: #000; display: block; overflow: auto; }
+      #main-content { padding: 0; }
+      .card { background: #fff; color: #000; border: 1px solid #000; box-shadow: none; }
+      .card-name { color: #000; }
+      .card-years { color: #444; }
+      .tree-node { border-left-color: #000; }
+      .tree-node::before { color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Trah Navigasi -->
+  <div id="sidebar">
+    <h3>Daftar Trah</h3>
+    <div id="trah-list"></div>
+    <button class="btn-add-trah" onclick="tambahTrah()">+ TAMBAH TRAH</button>
+    <button class="btn-preview-mode" onclick="window.print()">🖨️ PRATINJAU CETAK</button>
+  </div>
+
+  <!-- Area Pohon Silsilah -->
+  <div id="main-content">
+    <div class="header-action">
+      <h2 id="title-trah" style="color: var(--accent-color);">Pilih Trah</h2>
+      <button class="btn-action" style="padding: 8px 12px; font-weight: bold;" onclick="openForm(null)">+ Tambah Uyut / Leluhur Utama</button>
+    </div>
+    <div id="tree-root" class="tree-container"></div>
+  </div>
+
+  <!-- Modal Input Data Member -->
+  <div id="modalForm" class="modal">
+    <div class="modal-content">
+      <h4 id="modalTitle">Tambah Anggota</h4>
+      <input type="text" id="inputNama" placeholder="Nama Lengkap / Panggilan" required>
+      <input type="text" id="inputLahir" placeholder="Tahun Lahir (opsional)">
+      <input type="text" id="inputWafat" placeholder="Tahun Wafat (opsional)">
+      <input type="text" id="inputFoto" placeholder="URL Foto (opsional)">
+      <div class="modal-btns">
+        <button class="btn-action" onclick="closeModal('modalForm')">Batal</button>
+        <button class="btn-action" style="background: var(--accent-color); color:#000;" onclick="saveMember()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Preview Detail Anggota -->
+  <div id="modalPreview" class="modal">
+    <div class="modal-content" style="text-align: center;">
+      <h4 style="color: var(--accent-color);">Pratinjau Anggota</h4>
+      <div id="prevPhoto" style="width: 80px; height: 80px; margin: 0 auto; border-radius: 50%; background: #333; overflow: hidden; border: 2px solid var(--accent-color); display: flex; align-items: center; justify-content: center;"></div>
+      <h3 id="prevNama" style="color: #fff; margin-top: 10px;">-</h3>
+      <p id="prevTahun" style="color: var(--text-sub); font-size: 12px;">-</p>
+      <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; font-size: 12px; text-align: left; color: #ccc;" id="prevChildList"></div>
+      <div class="modal-btns">
+        <button class="btn-action" onclick="closeModal('modalPreview')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let db = JSON.parse(localStorage.getItem('silsilah_db')) || {
+      trahList: ["TRAH AYAH", "TRAH IBU"],
+      activeTrah: "TRAH AYAH",
+      members: [
+        { id: '1', trah: "TRAH AYAH", parentId: null, nama: "UYUT A", lahir: "", wafat: "", foto: "" },
+        { id: '2', trah: "TRAH AYAH", parentId: '1', nama: "KAKEK A", lahir: "", wafat: "", foto: "" },
+        { id: '3', trah: "TRAH AYAH", parentId: '2', nama: "AYAH", lahir: "", wafat: "", foto: "" }
+      ]
+    };
+
+    let targetParentId = null;
+
+    function saveData() {
+      localStorage.setItem('silsilah_db', JSON.stringify(db));
+      renderSidebar();
+      renderTree();
+    }
+
+    function renderSidebar() {
+      const container = document.getElementById('trah-list');
+      if (!container) return;
+      container.innerHTML = '';
+      db.trahList.forEach(trah => {
+        const btn = document.createElement('button');
+        btn.className = `btn-trah ${trah === db.activeTrah ? 'active' : ''}`;
+        btn.innerText = trah;
+        btn.onclick = () => {
+          db.activeTrah = trah;
+          saveData();
+        };
+        container.appendChild(btn);
+      });
+      const titleElem = document.getElementById('title-trah');
+      if (titleElem) titleElem.innerText = db.activeTrah;
+    }
+
+    function renderTree() {
+      const rootDiv = document.getElementById('tree-root');
+      if (!rootDiv) return;
+      rootDiv.innerHTML = '';
+
+      const currentMembers = db.members.filter(m => m.trah === db.activeTrah);
+      const roots = currentMembers.filter(m => m.parentId === null);
+
+      if (roots.length === 0) {
+        rootDiv.innerHTML = `<p style="color: var(--text-sub); font-style: italic;">Belum ada data Uyut / Leluhur Utama di ${db.activeTrah}. Klik tombol "+ Tambah Uyut / Leluhur Utama" di atas.</p>`;
+        return;
+      }
+
+      roots.forEach(root => {
+        rootDiv.appendChild(createNodeElement(root, currentMembers, true));
+      });
+    }
+
+    function createNodeElement(member, allMembers, isRoot = false) {
+      const nodeDiv = document.createElement('div');
+      nodeDiv.className = `tree-node ${isRoot ? 'root-node' : ''}`;
+
+      const tahunText = (member.lahir || member.wafat) ? `(${member.lahir || '?'} - ${member.wafat || 'Sekarang'})` : '';
+      const photoContent = member.foto ? `<img src="${member.foto}" alt="${member.nama}">` : `FOTO`;
+
+      nodeDiv.innerHTML = `
+        <div class="card" onclick="previewMember('${member.id}', event)">
+          <div class="card-photo">${photoContent}</div>
+          <div class="card-info">
+            <span class="card-name">${member.nama}</span>
+            <span class="card-years">${tahunText}</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-action" onclick="event.stopPropagation(); openForm('${member.id}')">+ Anak</button>
+            <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteMember('${member.id}')">🗑️</button>
+          </div>
+        </div>
+      `;
+
+      const children = allMembers.filter(m => m.parentId === member.id);
+      children.forEach(child => {
+        nodeDiv.appendChild(createNodeElement(child, allMembers, false));
+      });
+
+      return nodeDiv;
+    }
+
+    function previewMember(id, event) {
+      const member = db.members.find(m => m.id === id);
+      if (!member) return;
+
+      document.getElementById('prevNama').innerText = member.nama;
+      document.getElementById('prevTahun').innerText = (member.lahir || member.wafat) ? `Masa Hidup: ${member.lahir || '?'} - ${member.wafat || 'Sekarang'}` : 'Masa Hidup: -';
+      document.getElementById('prevPhoto').innerHTML = member.foto ? `<img src="${member.foto}" style="width:100%;height:100%;object-fit:cover;">` : 'FOTO';
+
+      const children = db.members.filter(m => m.parentId === id);
+      const childNames = children.map(c => c.nama).join(', ') || 'Belum ada data anak';
+      document.getElementById('prevChildList').innerHTML = `<strong>Daftar Anak:</strong><br>${childNames}`;
+
+      document.getElementById('modalPreview').style.display = 'flex';
+    }
+
+    function openForm(parentId) {
+      targetParentId = parentId;
+      document.getElementById('modalTitle').innerText = parentId === null ? 'Tambah Uyut / Leluhur Utama' : 'Tambah Anak';
+      document.getElementById('inputNama').value = '';
+      document.getElementById('inputLahir').value = '';
+      document.getElementById('inputWafat').value = '';
+      document.getElementById('inputFoto').value = '';
+      document.getElementById('modalForm').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function saveMember() {
+      const nama = document.getElementById('inputNama').value.trim();
+      if (!nama) return alert('Nama harus diisi!');
+
+      const newMember = {
+        id: Date.now().toString(),
+        trah: db.activeTrah,
+        parentId: targetParentId,
+        nama: nama,
+        lahir: document.getElementById('inputLahir').value.trim(),
+        wafat: document.getElementById('inputWafat').value.trim(),
+        foto: document.getElementById('inputFoto').value.trim()
+      };
+
+      db.members.push(newMember);
+      saveData();
+      closeModal('modalForm');
+    }
+
+    function deleteMember(id) {
+      if (confirm('Hapus anggota ini beserta cabang keturunannya?')) {
+        const idsToDelete = [id];
+        const findChildren = (pid) => {
+          db.members.filter(m => m.parentId === pid).forEach(c => {
+            idsToDelete.push(c.id);
+            findChildren(c.id);
+          });
+        };
+        findChildren(id);
+        db.members = db.members.filter(m => !idsToDelete.includes(m.id));
+        saveData();
+      }
+    }
+
+    function tambahTrah() {
+      const namaTrah = prompt("Masukkan nama trah baru (misal: TRAH KAKEK B):");
+      if (namaTrah && !db.trahList.includes(namaTrah.toUpperCase())) {
+        const cleanName = namaTrah.toUpperCase();
+        db.trahList.push(cleanName);
+        db.activeTrah = cleanName;
+        saveData();
+      }
+    }
+
+    renderSidebar();
+    renderTree();
+  </script>
+</body>
+</html>

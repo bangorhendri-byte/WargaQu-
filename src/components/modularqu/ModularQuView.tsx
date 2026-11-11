@@ -907,17 +907,24 @@ export const ModularQuView: React.FC<ModularQuViewProps> = ({
             </button>
           )}
 
-          {/* Quick toggle to Bakso Qu Resto if available */}
-          {onOpenBaksoQu && (
+          {/* UsahaQu Switch: BaksoQu vs ModularQu */}
+          <div className="bg-zinc-950/80 p-0.5 rounded-xl flex items-center border border-zinc-700 shadow-inner">
+            {onOpenBaksoQu && (
+              <button
+                onClick={onOpenBaksoQu}
+                className="text-[11px] text-zinc-300 hover:text-white hover:bg-white/10 px-2.5 py-1 rounded-lg flex items-center gap-1 font-bold transition active:scale-95"
+                title="Beralih ke BaksoQu (POS Meja & Kasir Resto)"
+              >
+                <span>🍲 BaksoQu</span>
+              </button>
+            )}
             <button
-              onClick={onOpenBaksoQu}
-              className="text-[10px] bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-xl flex items-center gap-1 font-bold"
-              title="Buka Bakso Qu Resto & Meja"
+              className="text-[11px] bg-emerald-500 text-zinc-950 font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs"
+              title="Sedang aktif: ModularQu (POS Multi-Usaha & Voice AI)"
             >
-              <Store className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Resto Meja</span>
+              <span>🎙️ ModularQu</span>
             </button>
-          )}
+          </div>
 
           {/* Quick toggle to Smart Care CS */}
           {onOpenBantuan && (

@@ -22,6 +22,7 @@ interface NavigationDrawerProps {
   profile: RestaurantProfile;
   printerConfig: PrinterConfig;
   occupiedTablesCount: number;
+  onBackToHub?: () => void;
 }
 
 export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
@@ -32,6 +33,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   profile,
   printerConfig,
   occupiedTablesCount,
+  onBackToHub,
 }) => {
   if (!isOpen) return null;
 
@@ -80,6 +82,24 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
 
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
+          {onBackToHub && (
+            <div className="mb-2">
+              <button
+                onClick={() => {
+                  onBackToHub();
+                  onClose();
+                }}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 transition-all active:scale-95"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base">🏠</span>
+                  <span>Hub UsahaQu (Ganti Mode)</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
+              </button>
+            </div>
+          )}
+
           <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-400">
             Navigasi Utama
           </div>
