@@ -28,12 +28,15 @@ import {
 import { FamilyMember } from './LeluhurQuView';
 import { UserAccount } from '../../types';
 import { PratinjauSilsilahEngine } from './PratinjauSilsilahEngine';
+import { DEMO_SANTA_MEMBERS } from './demoData';
 
-interface IsiCepatSilsilahViewProps {
+export interface IsiCepatSilsilahViewProps {
   members: FamilyMember[];
   setMembers: React.Dispatch<React.SetStateAction<FamilyMember[]>>;
   showNotification: (msg: string) => void;
   currentUser?: UserAccount | null;
+  externalViewMode?: 'editor' | 'preview_tree';
+  onViewModeChange?: (mode: 'editor' | 'preview_tree') => void;
 }
 
 export const IsiCepatSilsilahView: React.FC<IsiCepatSilsilahViewProps> = ({
@@ -41,9 +44,16 @@ export const IsiCepatSilsilahView: React.FC<IsiCepatSilsilahViewProps> = ({
   setMembers,
   showNotification,
   currentUser,
+  externalViewMode,
+  onViewModeChange,
 }) => {
   // Mode Tampilan: 'editor' (Tabel & Input Koma) vs 'preview_tree' (Bagan Pohon Visual & Kertas Cetak)
-  const [viewMode, setViewMode] = useState<'editor' | 'preview_tree'>('editor');
+  const [internalViewMode, setInternalViewMode] = useState<'editor' | 'preview_tree'>('editor');
+  const viewMode = externalViewMode !== undefined ? externalViewMode : internalViewMode;
+  const setViewMode = (mode: 'editor' | 'preview_tree') => {
+    setInternalViewMode(mode);
+    if (onViewModeChange) onViewModeChange(mode);
+  };
 
   // Selected Person for Hierarchy Inspection & Adding/Editing Children
   const [selectedPersonId, setSelectedPersonId] = useState<string>('');
@@ -316,142 +326,7 @@ export const IsiCepatSilsilahView: React.FC<IsiCepatSilsilahViewProps> = ({
 
   // Muat Contoh Skenario Sesuai Request User (Santa -> madgani -> Samud -> maman, Ian, Hendri)
   const handleLoadUserScenarioDemo = () => {
-    const demoMembers: FamilyMember[] = [
-      // Gen 1: Santa
-      {
-        id: 'santa-1',
-        name: 'Santa',
-        relation: 'ayah',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Almarhum',
-        role: 'Uyut Utama Trah',
-        kinshipTitle: 'Leluhur Utama (Uyut)',
-        birthYear: '1915',
-      },
-      // Gen 2: Anak-anak Santa (madgani, Inoh, Enit)
-      {
-        id: 'madgani-2',
-        name: 'madgani',
-        parentId: 'santa-1',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Almarhum',
-        role: 'Anak ke-1 dari Santa',
-        kinshipTitle: 'Abah / Kakek',
-        birthYear: '1942',
-        birthOrder: 1,
-      },
-      {
-        id: 'inoh-2',
-        name: 'Inoh',
-        parentId: 'santa-1',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Almarhum',
-        role: 'Anak ke-2 dari Santa',
-        kinshipTitle: 'Uwa / Mang',
-        birthYear: '1945',
-        birthOrder: 2,
-      },
-      {
-        id: 'enit-2',
-        name: 'Enit',
-        parentId: 'santa-1',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'P',
-        status: 'Almarhum',
-        role: 'Anak ke-3 dari Santa',
-        kinshipTitle: 'Bibi / Uwa',
-        birthYear: '1948',
-        birthOrder: 3,
-      },
-      // Gen 3: Anak-anak madgani (dasri, Samud, Ebah)
-      {
-        id: 'dasri-3',
-        name: 'dasri',
-        parentId: 'madgani-2',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Hidup',
-        role: 'Anak ke-1 dari madgani',
-        kinshipTitle: 'Kakak',
-        birthYear: '1968',
-        birthOrder: 1,
-      },
-      {
-        id: 'samud-3',
-        name: 'Samud',
-        parentId: 'madgani-2',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Hidup',
-        role: 'Anak ke-2 dari madgani',
-        kinshipTitle: 'Bapak / Ayah',
-        birthYear: '1971',
-        birthOrder: 2,
-      },
-      {
-        id: 'ebah-3',
-        name: 'Ebah',
-        parentId: 'madgani-2',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'P',
-        status: 'Hidup',
-        role: 'Anak ke-3 dari madgani',
-        kinshipTitle: 'Adik',
-        birthYear: '1975',
-        birthOrder: 3,
-      },
-      // Gen 4: Anak-anak Samud (maman, Ian, Hendri)
-      {
-        id: 'maman-4',
-        name: 'maman',
-        parentId: 'samud-3',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Hidup',
-        role: 'Anak ke-1 dari Samud',
-        kinshipTitle: 'Kakak',
-        birthYear: '1995',
-        birthOrder: 1,
-      },
-      {
-        id: 'ian-4',
-        name: 'Ian',
-        parentId: 'samud-3',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Hidup',
-        role: 'Anak ke-2 dari Samud',
-        kinshipTitle: 'Anak',
-        birthYear: '1998',
-        birthOrder: 2,
-      },
-      {
-        id: 'hendri-4',
-        name: 'Hendri',
-        parentId: 'samud-3',
-        relation: 'anak',
-        trah: 'ayah',
-        gender: 'L',
-        status: 'Hidup',
-        role: 'Anak ke-3 dari Samud',
-        kinshipTitle: 'Bungsu',
-        birthYear: '2002',
-        birthOrder: 3,
-      },
-    ];
-
-    setMembers(demoMembers);
+    setMembers(DEMO_SANTA_MEMBERS);
     setSelectedPersonId('samud-3');
     setChildrenInputText('maman, Ian, Hendri');
     setIsEditingChildren(false);
@@ -633,61 +508,6 @@ export const IsiCepatSilsilahView: React.FC<IsiCepatSilsilahViewProps> = ({
 
   return (
     <div className="space-y-4 text-slate-800 animate-in fade-in duration-200">
-      {/* HEADER SECTION: TITEL & QUICK ACTIONS */}
-      <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-slate-900 text-white rounded-3xl p-4 sm:p-5 shadow-lg border border-emerald-500/30 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-400 to-emerald-500 flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
-              <Sparkles className="w-5 h-5 text-slate-950" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
-                  <span>Isi Cepat Silsilah (Format Koma &amp; Excel)</span>
-                </h3>
-                <span className="text-[10px] bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold px-2 py-0.5 rounded-full">
-                  ⚡ Auto-Lineage
-                </span>
-              </div>
-              <p className="text-xs text-emerald-200/90 mt-0.5">
-                Cukup ketik nama anak dipisahkan koma (<code className="bg-black/30 px-1 py-0.2 rounded font-mono text-amber-300">madgani, Inoh, Enit</code>). Otomatis tersambung Uyut &rarr; Abah &rarr; Bapak &rarr; Anak!
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Action Buttons: Contoh Data, Pratinjau Pohon, & Tambah Tokoh */}
-          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
-            <button
-              onClick={() => setViewMode('preview_tree')}
-              className="py-1.5 px-3 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black rounded-xl text-xs shadow-md flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
-              title="Buka Pratinjau Pohon Silsilah Multi-Skin & PCB Print Engine"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>🌳 Pratinjau Pohon &amp; Cetak</span>
-            </button>
-
-            <button
-              onClick={handleLoadUserScenarioDemo}
-              className="py-1.5 px-3 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
-              title="Muat contoh lengkap: Santa -> madgani -> Samud -> maman, Ian, Hendri"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Contoh Santa &rarr; Samud</span>
-            </button>
-
-            <button
-              onClick={() => setShowAddPersonModal(true)}
-              className="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 active:scale-95 transition border border-emerald-400/40 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#5eead4]" />
-              <span>(+) Tokoh / Leluhur Baru</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* MODE SELECTOR TABS: EDITOR VS PRATINJAU POHON */}
       <div className="bg-emerald-950/80 p-1.5 rounded-2xl flex items-center border border-emerald-500/30 gap-1.5 shadow-sm">
         <button

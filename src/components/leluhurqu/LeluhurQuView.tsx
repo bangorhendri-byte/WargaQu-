@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
+  Menu,
   Camera,
   Users,
   GitFork,
@@ -67,6 +68,7 @@ import { AuthService } from '../../services/auth';
 import { RealtimeSyncService } from '../../services/realtimeSync';
 import { MonetizationService } from '../../services/monetization';
 import { IsiCepatSilsilahView } from './IsiCepatSilsilahView';
+import { DEMO_SANTA_MEMBERS } from './demoData';
 
 interface LeluhurQuViewProps {
   onBackToWarga: () => void;
@@ -1693,9 +1695,11 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
   currentUser = null,
   onOpenSecurityModal,
 }) => {
-  // Navigation Tabs: Isi Cepat Silsilah (Koma & Excel) | Medsos Trah | Doa Malam Jumat | Arsip & Ekspor
+  // Navigation Tabs: SilsilahQu (Koma & Excel) | Medsos Trah | Doa Malam Jumat | Arsip & Ekspor
   const [activeTab, setActiveTab] = useState<'isicepat' | 'medsos' | 'doa' | 'arsip'>('isicepat');
   const [activeMedsosTrah, setActiveMedsosTrah] = useState<TrahPostType>('ayah');
+  const [showLeftSidebar, setShowLeftSidebar] = useState<boolean>(false);
+  const [silsilahViewMode, setSilsilahViewMode] = useState<'editor' | 'preview_tree'>('editor');
 
   // Auto-connect Akun Pasangan: Jika aktif, otomatis memperluas struktur menjadi 4 Trah
   const [isSpouseConnected, setIsSpouseConnected] = useState<boolean>(() => {
@@ -4387,8 +4391,8 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
   return (
     <div className="w-full h-full bg-[#f0fdf4] font-sans antialiased flex flex-col relative select-none overflow-hidden text-slate-800">
       {/* TOP HEADER BAR (WARGAQU EMERALD SIGNATURE PALETTE) */}
-      <header className="bg-gradient-to-r from-[#047857] via-[#059669] to-[#047857] text-white px-4 pt-10 sm:pt-11 pb-3 flex justify-between items-center shadow-md z-30 shrink-0 android-header-safe">
-        <div className="flex items-center space-x-2.5">
+      <header className="bg-gradient-to-r from-[#047857] via-[#059669] to-[#047857] text-white px-3 sm:px-4 pt-10 sm:pt-11 pb-3 flex justify-between items-center shadow-md z-30 shrink-0 android-header-safe">
+        <div className="flex items-center space-x-2">
           <button
             onClick={onBackToWarga}
             className="p-1.5 -ml-1 text-emerald-100 hover:text-white hover:bg-emerald-800/60 rounded-xl transition active:scale-95"
@@ -4396,6 +4400,17 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
+
+          {/* TOMBOL MENU DRAWER KIRI (HIDDEN SIDEBAR) */}
+          <button
+            onClick={() => setShowLeftSidebar(true)}
+            className="p-1.5 bg-emerald-950/40 hover:bg-emerald-950/70 border border-emerald-400/40 text-emerald-100 hover:text-white rounded-xl transition active:scale-95 flex items-center justify-center gap-1 shadow-xs"
+            title="Buka Menu Silsilah &amp; Fitur (Sidebar Kiri)"
+          >
+            <Menu className="w-5 h-5 text-[#5eead4]" />
+            <span className="text-[11px] font-bold text-white hidden xs:inline pr-1">Menu</span>
+          </button>
+
           <div className="w-9 h-9 bg-emerald-950/40 border border-emerald-300/40 rounded-xl flex items-center justify-center text-[#5eead4] shadow-xs">
             <GitFork className="w-5 h-5 rotate-180" />
           </div>
@@ -4422,37 +4437,15 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
           </div>
         </div>
 
-        {/* Quick Top Right Actions: Pratinjau Pohon, Kelola KK, Buku Silsilah, Bersihkan Mock */}
+        {/* TOP RIGHT: Buka Menu & Fitur Silsilah (4 Ikon telah dipindahkan ke Sidebar Kiri) */}
         <div className="flex items-center space-x-1.5">
           <button
-            onClick={() => setActiveTab('isicepat')}
-            className="bg-amber-400 hover:bg-amber-300 text-slate-950 px-2.5 py-1.5 rounded-lg text-[11px] font-black flex items-center gap-1 shadow-xs active:scale-95 transition cursor-pointer"
-            title="Buka Pratinjau Pohon Silsilah & Cetak Kertas"
+            onClick={() => setShowLeftSidebar(true)}
+            className="bg-emerald-950/40 hover:bg-emerald-950/70 active:scale-95 text-white border border-emerald-400/40 text-[11px] font-bold px-2.5 py-1.5 rounded-xl flex items-center space-x-1.5 transition shadow-xs cursor-pointer"
+            title="Buka Menu Silsilah &amp; Fitur (Sidebar Kiri)"
           >
-            <Printer className="w-3.5 h-3.5 text-slate-950" />
-            <span className="hidden sm:inline">Pratinjau Pohon</span>
-          </button>
-          <button
-            onClick={() => handleOpenKkModal('manual')}
-            className="bg-emerald-950/40 hover:bg-emerald-950/60 active:scale-95 text-white border border-emerald-400/50 text-[11px] font-bold px-2 py-1.5 rounded-lg flex items-center space-x-1 transition shadow-xs"
-            title="Kelola & Buat Kartu Keluarga"
-          >
-            <Camera className="w-3.5 h-3.5 text-[#5eead4]" />
-            <span className="text-white hidden sm:inline">KK &amp; Scan</span>
-          </button>
-          <button
-            onClick={() => setShowPdfModal(true)}
-            className="bg-emerald-600/80 hover:bg-emerald-600 text-white p-1.5 rounded-lg active:scale-95 transition"
-            title="Buku Silsilah Heritage (A4 - A0)"
-          >
-            <BookOpen className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setShowResetConfirmModal(true)}
-            className="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-400/30 text-rose-200 p-1.5 rounded-lg active:scale-95 transition"
-            title="Hapus / Bersihkan Mock Data"
-          >
-            <Trash2 className="w-4 h-4" />
+            <Menu className="w-4 h-4 text-[#5eead4]" />
+            <span className="text-[11px] font-bold text-white hidden sm:inline">Fitur Silsilah</span>
           </button>
         </div>
       </header>
@@ -4460,61 +4453,15 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
       {/* SCROLLABLE MAIN CONTENT AREA */}
       <main className="flex-1 overflow-y-auto no-scrollbar p-3.5 space-y-3.5 pb-24">
 
-        {/* BANNER PRIVASI: KHUSUS UNDANGAN KELUARGA BESAR & PEMISAH MODUL RT */}
-          <div className="bg-gradient-to-r from-emerald-950 via-[#064e3b] to-slate-950 text-white rounded-2xl p-3 shadow-md border border-emerald-400/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-            <div className="flex items-start gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-[#5eead4] border border-emerald-400/40 flex items-center justify-center shrink-0 mt-0.5">
-                <Lock className="w-4 h-4 text-[#5eead4]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-xs font-black tracking-wide text-white flex items-center gap-1.5">
-                    <span>Ruang Privat Keluarga Besar (Khusus Undangan)</span>
-                  </h4>
-                  <span className="text-[9px] bg-emerald-500/30 text-[#5eead4] border border-emerald-400/30 px-2 py-0.2 rounded-full font-bold">
-                    Terisolasi dari RT
-                  </span>
-                </div>
-                <p className="text-[10px] text-emerald-200/90 leading-tight mt-0.5">
-                  Hanya akun Anda ({currentUser?.name || 'User'}) yang terhubung ke Warga Lingkungan RT. Data nasab &amp; linimasa Medsos tiap Trah terpisah mandiri.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
-              <button
-                onClick={() => {
-                  setInviteTrahTarget('ayah');
-                  setShowShareModal(true);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-xl text-[10px] font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 border border-emerald-400/40"
-                title="Buka Undangan Keluarga Besar per-Trah"
-              >
-                <Share2 className="w-3 h-3 text-[#5eead4]" />
-                <span>Undang Keluarga</span>
-              </button>
-              <button
-                onClick={() => setShowSpouseModal(true)}
-                className={`px-2.5 py-1.5 rounded-xl text-[10px] font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 border ${
-                  isSpouseConnected
-                    ? 'bg-amber-400 hover:bg-amber-300 text-slate-950 border-amber-300 font-black'
-                    : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
-                }`}
-                title="Atur Koneksi Pasangan & Status 4 Trah"
-              >
-                <Users className="w-3 h-3" />
-                <span>{isSpouseConnected ? '✨ 4 Trah Aktif' : '👥 2 Trah Aktif'}</span>
-              </button>
-            </div>
-          </div>
-
-        {/* TAB 1: ISI CEPAT SILSILAH (KOMA & FILTER EXCEL) */}
+        {/* TAB 1: SILSILAHQU (KOMA & FILTER EXCEL) */}
         {activeTab === 'isicepat' && (
           <IsiCepatSilsilahView
             members={members}
             setMembers={setMembers}
             showNotification={showNotification}
             currentUser={currentUser}
+            externalViewMode={silsilahViewMode}
+            onViewModeChange={setSilsilahViewMode}
           />
         )}
 
@@ -4945,19 +4892,19 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
 
       {/* BOTTOM NAVIGATION BAR KHUSUS LELUHURQU (WARGAQU EMERALD SIGNATURE THEME) */}
       <nav className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-emerald-100 px-3 pt-2 pb-6 sm:pb-7 flex justify-around items-center z-40 shadow-xl android-navbar-safe">
-        {/* Tab 1: Isi Cepat Silsilah (Format Koma & Excel) */}
+        {/* Tab 1: SilsilahQu (Format Koma & Excel) */}
         <button
           onClick={() => setActiveTab('isicepat')}
           className={`flex flex-col items-center gap-1 transition active:scale-95 ${
             activeTab === 'isicepat' ? 'text-emerald-700 font-bold' : 'text-slate-400 hover:text-emerald-700 font-medium'
           }`}
-          title="Isi Cepat Silsilah (Format Koma & Filter Excel)"
+          title="SilsilahQu (Format Koma & Filter Excel)"
         >
           <div className="relative">
             <Sparkles className={`w-5 h-5 ${activeTab === 'isicepat' ? 'text-emerald-700' : 'text-slate-400'}`} />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full"></span>
           </div>
-          <span className="text-[10px]">Isi Cepat</span>
+          <span className="text-[10px]">SilsilahQu</span>
         </button>
 
         {/* Tab 2: Medsos Trah */}
@@ -4996,6 +4943,378 @@ export const LeluhurQuView: React.FC<LeluhurQuViewProps> = ({
           <span className="text-[10px]">Arsip &amp; Buku</span>
         </button>
       </nav>
+
+      {/* ========================================================================= */}
+      {/* HIDDEN LEFT SIDEBAR DRAWER (DRAWER SAMPING KIRI) */}
+      {/* Berisi 4 Ikon Utama: Print, Camera KK, Buku Silsilah, Bersihkan Mock */}
+      {/* ========================================================================= */}
+      {showLeftSidebar && (
+        <div className="fixed inset-0 z-50 flex animate-in fade-in duration-200">
+          {/* Backdrop Dim */}
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+            onClick={() => setShowLeftSidebar(false)}
+          />
+
+          {/* Drawer Sidebar Container */}
+          <aside className="relative w-[85%] max-w-[340px] bg-slate-900 text-white shadow-2xl flex flex-col h-full border-r border-emerald-500/30 z-10 animate-in slide-in-from-left duration-200">
+            {/* Header Drawer */}
+            <div className="p-4 bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-950 border-b border-emerald-500/20 flex items-center justify-between">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 bg-emerald-950 border border-emerald-400/40 rounded-xl flex items-center justify-center text-[#5eead4] shadow-xs">
+                  <GitFork className="w-5 h-5 rotate-180" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm tracking-wide text-white flex items-center gap-1.5">
+                    Leluhur<span className="text-[#5eead4]">Qu</span>
+                  </h3>
+                  <p className="text-[10px] text-emerald-300/80 font-medium">Menu &amp; Pusat Fitur Silsilah</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLeftSidebar(false)}
+                className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition cursor-pointer"
+                title="Tutup Menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto p-3.5 space-y-4 no-scrollbar">
+              {/* Section 1: AKSI & FITUR SILSILAH (Dipindahkan dari Card Isi Cepat & Header) */}
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-wider text-emerald-400 mb-2 px-1 flex items-center justify-between">
+                  <span>Aksi &amp; Fitur Silsilah</span>
+                  <span className="text-[9px] bg-emerald-500/20 text-[#5eead4] px-1.5 py-0.5 rounded font-mono">Utama</span>
+                </div>
+                <div className="space-y-2">
+                  {/* 1. Pratinjau Pohon & Cetak (PCB Engine) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setActiveTab('isicepat');
+                      setSilsilahViewMode('preview_tree');
+                    }}
+                    className="w-full text-left p-2.5 rounded-2xl bg-slate-800/90 hover:bg-emerald-950/70 border border-emerald-500/30 hover:border-emerald-400/70 flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 font-black shadow-xs group-hover:scale-105 transition">
+                      <Printer className="w-5 h-5 text-slate-950" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white group-hover:text-amber-300 flex items-center justify-between">
+                        <span>🌳 Pratinjau Pohon &amp; Cetak</span>
+                        <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.2 rounded font-mono font-bold">PCB</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">4 Skin Bagan, Jalur 90°, Skala Kertas</p>
+                    </div>
+                  </button>
+
+                  {/* 2. Muat Contoh Skenario (Santa -> madgani -> Samud -> maman, Ian, Hendri) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setMembers(DEMO_SANTA_MEMBERS);
+                      setActiveTab('isicepat');
+                      setSilsilahViewMode('editor');
+                      showNotification('Contoh silsilah (Santa → madgani → Samud → maman, Ian, Hendri) berhasil dimuat!');
+                    }}
+                    className="w-full text-left p-2.5 rounded-2xl bg-slate-800/90 hover:bg-emerald-950/70 border border-amber-500/30 hover:border-amber-400/70 flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-emerald-500 text-slate-950 flex items-center justify-center shrink-0 font-black shadow-xs group-hover:scale-105 transition">
+                      <Sparkles className="w-5 h-5 text-slate-950" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white group-hover:text-amber-300 flex items-center justify-between">
+                        <span>⚡ Contoh Santa &rarr; Samud</span>
+                        <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.2 rounded font-mono font-bold">Demo</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Santa &rarr; madgani &rarr; Samud &rarr; maman</p>
+                    </div>
+                  </button>
+
+                  {/* 3. (+) Tokoh / Leluhur Baru */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setShowAddMemberModal(true);
+                    }}
+                    className="w-full text-left p-2.5 rounded-2xl bg-slate-800/90 hover:bg-emerald-950/70 border border-emerald-500/30 hover:border-emerald-400/70 flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold shadow-xs group-hover:scale-105 transition">
+                      <Plus className="w-5 h-5 text-[#5eead4]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white group-hover:text-emerald-300 flex items-center justify-between">
+                        <span>(+) Tokoh / Leluhur Baru</span>
+                        <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded font-mono font-bold">+Baru</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Tambah akar nasab / tokoh silsilah</p>
+                    </div>
+                  </button>
+
+                  {/* 4. Kelola Kartu Keluarga & Scan Kamera */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      handleOpenKkModal('manual');
+                    }}
+                    className="w-full text-left p-2.5 rounded-2xl bg-slate-800/90 hover:bg-emerald-950/70 border border-emerald-500/30 hover:border-emerald-400/70 flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 font-bold shadow-xs group-hover:scale-105 transition">
+                      <Camera className="w-5 h-5 text-[#5eead4]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white group-hover:text-emerald-300 flex items-center justify-between">
+                        <span>Kelola KK &amp; Scan Kamera</span>
+                        <span className="text-[9px] bg-teal-500/20 text-[#5eead4] px-1.5 py-0.2 rounded font-mono font-bold">KK</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Input manual KK &amp; scan dokumen foto</p>
+                    </div>
+                  </button>
+
+                  {/* 5. Buku Silsilah Heritage (A4 - A0) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setShowPdfModal(true);
+                    }}
+                    className="w-full text-left p-2.5 rounded-2xl bg-slate-800/90 hover:bg-emerald-950/70 border border-emerald-500/30 hover:border-emerald-400/70 flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold shadow-xs group-hover:scale-105 transition">
+                      <BookOpen className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white group-hover:text-blue-300 flex items-center justify-between">
+                        <span>Buku Silsilah Heritage</span>
+                        <span className="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.2 rounded font-mono font-bold">A4-A0</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Buku arsip nasab keluarga &amp; banner trah</p>
+                    </div>
+                  </button>
+
+                  {/* 6. Bersihkan / Reset Mock Data */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setShowResetConfirmModal(true);
+                    }}
+                    className="w-full text-left p-2.5 rounded-2xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-500/30 hover:border-rose-400/50 flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-rose-900/60 text-rose-300 flex items-center justify-center shrink-0 font-bold shadow-xs group-hover:scale-105 transition">
+                      <Trash2 className="w-5 h-5 text-rose-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-rose-200 group-hover:text-rose-100 flex items-center justify-between">
+                        <span>Bersihkan Mock Data</span>
+                        <span className="text-[9px] bg-rose-900/40 text-rose-300 px-1.5 py-0.2 rounded font-mono font-bold">Reset</span>
+                      </div>
+                      <p className="text-[10px] text-rose-300/70 mt-0.5">Kosongkan data demo &amp; mulai data murni</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Section 2: KONEKSI KELUARGA & TRAH (Dipindahkan dari Card Ruang Privat) */}
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-wider text-emerald-400 mb-2 px-1 flex items-center justify-between">
+                  <span>Koneksi Keluarga &amp; Trah</span>
+                  <span className="text-[9px] bg-emerald-500/20 text-[#5eead4] px-1.5 py-0.5 rounded font-mono">Privat</span>
+                </div>
+                <div className="space-y-2">
+                  {/* Tombol Undang Keluarga Besar */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setInviteTrahTarget('ayah');
+                      setShowShareModal(true);
+                    }}
+                    className="w-full text-left p-2.5 rounded-2xl bg-emerald-950/60 hover:bg-emerald-950/90 border border-emerald-500/40 hover:border-emerald-400/70 flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold shadow-xs group-hover:scale-105 transition">
+                      <Share2 className="w-5 h-5 text-[#5eead4]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white group-hover:text-emerald-300 flex items-center justify-between">
+                        <span>Undang Keluarga Besar</span>
+                        <span className="text-[9px] bg-emerald-500/30 text-[#5eead4] px-1.5 py-0.2 rounded font-mono font-bold">Share</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Bagikan tautan silaturahmi per-Trah</p>
+                    </div>
+                  </button>
+
+                  {/* Tombol Atur Koneksi Pasangan / 4 Trah Aktif */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setShowSpouseModal(true);
+                    }}
+                    className={`w-full text-left p-2.5 rounded-2xl border flex items-center gap-3 transition group cursor-pointer shadow-xs active:scale-98 ${
+                      isSpouseConnected
+                        ? 'bg-amber-950/40 hover:bg-amber-950/70 border-amber-400/50'
+                        : 'bg-slate-800/90 hover:bg-slate-800 border-slate-700'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold shadow-xs group-hover:scale-105 transition ${
+                      isSpouseConnected ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-200'
+                    }`}>
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white group-hover:text-amber-300 flex items-center justify-between">
+                        <span>{isSpouseConnected ? '✨ 4 Trah Pasangan Aktif' : '👥 2 Trah Aktif'}</span>
+                        <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold ${
+                          isSpouseConnected ? 'bg-amber-400/20 text-amber-300' : 'bg-slate-700 text-slate-300'
+                        }`}>
+                          {isSpouseConnected ? '4 Trah' : '2 Trah'}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {isSpouseConnected ? 'Trah Ayah & Ibu Anda + Pasangan' : 'Klik untuk hubungkan trah pasangan'}
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Section 2: NAVIGASI MENU LELUHURQU */}
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2 px-1">
+                  Navigasi Menu
+                </div>
+                <div className="space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setActiveTab('isicepat');
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between text-xs font-semibold transition cursor-pointer ${
+                      activeTab === 'isicepat'
+                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Sparkles className="w-4 h-4 text-amber-300" />
+                      <span>SilsilahQu (Koma &amp; Excel)</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setActiveTab('medsos');
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between text-xs font-semibold transition cursor-pointer ${
+                      activeTab === 'medsos'
+                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Users className="w-4 h-4 text-emerald-400" />
+                      <span>Medsos Trah (Silaturahmi)</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setActiveTab('doa');
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between text-xs font-semibold transition cursor-pointer ${
+                      activeTab === 'doa'
+                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Moon className="w-4 h-4 text-amber-400" />
+                      <span>Doa Leluhur (Malam Jumat)</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setActiveTab('arsip');
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between text-xs font-semibold transition cursor-pointer ${
+                      activeTab === 'arsip'
+                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Archive className="w-4 h-4 text-teal-400" />
+                      <span>Arsip &amp; Ekspor Silsilah</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Section 3: RINGKASAN TRAH & CLOUD */}
+              <div className="bg-slate-950/70 border border-emerald-500/20 rounded-2xl p-3 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Status Silsilah</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLeftSidebar(false);
+                      setShowCloudModal(true);
+                    }}
+                    className="text-[10px] text-[#5eead4] hover:underline font-mono cursor-pointer"
+                  >
+                    Kelola Cloud &rarr;
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${isCloudSyncing ? 'bg-amber-400 animate-ping' : cloudSyncStatus === 'connected' ? 'bg-[#5eead4]' : 'bg-slate-500'}`} />
+                  <span className="text-white font-medium text-xs">
+                    {isCloudSyncing ? 'Sedang Sinkronisasi...' : cloudSyncStatus === 'connected' ? 'Tersambung Cloud Realtime' : 'Mode Offline / Lokal'}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-400 flex justify-between">
+                  <span>Total Anggota:</span>
+                  <span className="text-emerald-300 font-bold">{members.length} Jiwa</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Drawer Footer */}
+            <div className="p-3 bg-slate-950 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLeftSidebar(false);
+                  onBackToWarga();
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Kembali ke Beranda WargaQu</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* MODAL 1: SCAN KK AUTO-TEXT + KARTU NAMA/ALAMAT/TGL LAHIR + PAS FOTO + MINI STRUKTUR */}
